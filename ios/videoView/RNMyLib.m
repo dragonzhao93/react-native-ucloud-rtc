@@ -61,9 +61,9 @@ andReject:(RCTPromiseRejectBlock)reject){
 }
 
 /// 加入房间
-RCT_EXPORT_METHOD(joinRoomWithRoomid:(NSString *)roomid andUserid:(NSString *)userid andToken:(NSString *)token andResolve:(RCTPromiseResolveBlock)resolve
+RCT_EXPORT_METHOD(joinRoomWithRoomid:(NSString *)roomid andUserid:(NSString *)userid andToken:(NSString *)token andOnlyAudio:(BOOL)onlyAudio andResolve:(RCTPromiseResolveBlock)resolve
 andReject:(RCTPromiseRejectBlock)reject){
-    
+    [RNMyLib sharedLib].engine.isOnlyAudio = onlyAudio;
     [[RNMyLib sharedLib].engine joinRoomWithRoomId:roomid userId:userid token:@"" completionHandler:^(NSDictionary * _Nonnull response, int errorCode) {
         //[[RNMyLib sharedLib].engine setLocalPreview:[RNMyVideoView sharedView]];
         //[[RNMyLib sharedLib].engine.localStream renderOnView:[RNMyVideoView sharedView]];
