@@ -38,13 +38,45 @@ UCloudRtc.initWithAppid(appid, appKey);
 ## API
 #### 初始化 initWithAppid
 ```
-UCloudRtc.initWithAppid(appid, appKey)
+UCloudRtc.initWithAppid(appid, appKey).then(res => {
+    console.log('收到回调', res);
+  }).catch(err => {
+    console.log('捕获异常', err);
+  });
 ```
 #### 加入房间 joinRoomWithRoomid
 ```
-UCloudRtc.joinRoomWithRoomid(roomId, userId, token);
+UCloudRtc.joinRoomWithRoomid(roomId, userId, token).then(res => {
+    console.log('收到回调', res);
+  }).catch(err => {
+    console.log('捕获异常', err);
+  });
 ```
 #### 离开房间
 ```
 UCloudRtc.leaveRoom();
+```
+#### 订阅远程流
+ ```
+ subscribeRemoteStream
+ ```
+#### 取消订阅远程流
+ ```
+ unSubscribeRemoteStream
+ ```
+#### 发布本地流
+ ```
+ subscribeLocalStream
+ ```
+#### 取消发布本地流
+ ```
+ unSubscribeLocalStream
+ ```
+#### 录制音视频
+ ```
+ startRecordLocalStreamWithType
+ ```
+#### 停止录制
+ ```
+ stopRecordLocalStream
 ```

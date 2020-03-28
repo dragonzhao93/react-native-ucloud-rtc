@@ -17,10 +17,6 @@
 @property (nonatomic, strong) NSMutableArray<UCloudRtcStream*> *substreamList;
 /// 目标流
 @property (nonatomic, strong) UCloudRtcStream *targetStream;
-/// 新成员加入房间的回调
-@property (nonatomic, copy) RCTResponseSenderBlock userJoinRoomCallback;
-/// 新成员离开房间的回调
-@property (nonatomic, copy) RCTResponseSenderBlock userLeaveRoomCallback;
 @end
 
 
@@ -50,29 +46,31 @@ andReject:(RCTPromiseRejectBlock)reject){
     
     RNMyLib *sharedLib = [RNMyLib sharedLib];
     sharedLib.engine = [[UCloudRtcEngine alloc]initWithAppID:appid appKey:appkey completionBlock:^(int errorCode) {
-        if (errorCode) { // 初始化失败
+        if (errorCode) {
             reject(@(errorCode).stringValue,@"init fail", nil);
-        } else { // 初始化成功
+        } else {
             resolve(@"init success");
         }
     }];
+    sharedLib.engine.isAutoPublish = NO;//加入房间后将自动发布本地音视频 默认为YES
     sharedLib.engine.delegate = sharedLib;
     //[[sharedLib.engine] setPreviewMode:UCloudRtcVideoViewModeScaleAspectFit];
 }
 
 /// 加入房间
-RCT_EXPORT_METHOD(joinRoomWithRoomid:(NSString *)roomid andUserid:(NSString *)userid andToken:(NSString *)token andOnlyAudio:(BOOL)onlyAudio andResolve:(RCTPromiseResolveBlock)resolve
+RCT_EXPORT_METHOD(joinRoomWithRoomid:(NSString *)roomid andUserid:(NSString *)userid andToken:(NSString *)token andResolve:(RCTPromiseResolveBlock)resolve
 andReject:(RCTPromiseRejectBlock)reject){
-    [RNMyLib sharedLib].engine.isOnlyAudio = onlyAudio;
+    
     [[RNMyLib sharedLib].engine joinRoomWithRoomId:roomid userId:userid token:@"" completionHandler:^(NSDictionary * _Nonnull response, int errorCode) {
-        //[[RNMyLib sharedLib].engine setLocalPreview:[RNMyVideoView sharedView]];
+        NSLog(@"join room suceess!!!");
+       // [[RNMyLib sharedLib].engine setLocalPreview:[RNMyVideoView sharedView]];
         //[[RNMyLib sharedLib].engine.localStream renderOnView:[RNMyVideoView sharedView]];
         NSLog(@"response:%@",response);
         NSLog(@"errorCode:%d",errorCode);
         if (errorCode) { // 加入房间失败
             reject(@(errorCode).stringValue,@"joinRoom fail", nil);
         } else { //加入房间成功
-            resolve(response);
+            resolve(@"joinRoom success");
         }
     }];
 }
@@ -86,7 +84,6 @@ RCT_EXPORT_METHOD(leaveRoom){
 RCT_EXPORT_METHOD(subscribeRemoteStream){
     RNMyLib *sharedLib = [RNMyLib sharedLib];
     [sharedLib.engine subscribeMethod:sharedLib.targetStream];
-    
     // 渲染到指定视图
     [sharedLib.targetStream renderOnView:[RNMyVideoView sharedView]];
     NSLog(@"subscribeRemoteStream and  render");
@@ -124,16 +121,6 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     [sharedLib.engine stopRecord];
 }
 
-/// 设置新成员加入房间的回调
-RCT_EXPORT_METHOD(setupUserJoinRoomWithCallback:(RCTResponseSenderBlock)callback){
-    [RNMyLib sharedLib].userJoinRoomCallback = callback;
-}
-
-/// 设置新成员离开房间的回调
-RCT_EXPORT_METHOD(setupUserLeaveRoomWithCallback:(RCTResponseSenderBlock)callback){
-    [RNMyLib sharedLib].userLeaveRoomCallback = callback;
-}
-
 
 #pragma mark - UCloudRtcEngineDelegate
 
@@ -148,8 +135,8 @@ RCT_EXPORT_METHOD(setupUserLeaveRoomWithCallback:(RCTResponseSenderBlock)callbac
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)channel newStreamHasJoinRoom:(UCloudRtcStream *_Nonnull)stream {
     [RNMyLib sharedLib].targetStream = stream;
     // 渲染到指定视图
-    //RNMyLib *sharedLib = [RNMyLib sharedLib];
-    //[sharedLib.targetStream renderOnView:[RNMyVideoView sharedView]];
+    RNMyLib *sharedLib = [RNMyLib sharedLib];
+    [sharedLib.targetStream renderOnView:[RNMyVideoView sharedView]];
 }
 
 
@@ -175,25 +162,16 @@ RCT_EXPORT_METHOD(setupUserLeaveRoomWithCallback:(RCTResponseSenderBlock)callbac
 /**新成员加入*/
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager memberDidJoinRoom:(NSDictionary *_Nonnull)memberInfo{
     //新成员加入提示
-    NSString *message = [NSString stringWithFormat:@"用户:%@ 加入房间",memberInfo[@"user_id"]];
-    [RNMyLib showMessageWithCode:900002 andMessage:message];
-    RNMyLib *sharedLib = [RNMyLib sharedLib];
-    if (sharedLib.userJoinRoomCallback) {
-        sharedLib.userJoinRoomCallback(memberInfo);
-    }
+//    NSString *message = [NSString stringWithFormat:@"用户:%@ 加入房间",memberInfo[@"user_id"]];
+//    [RNMyLib showMessageWithCode:900002 andMessage:message];
 }
 
 /**成员退出*/
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager memberDidLeaveRoom:(NSDictionary *_Nonnull)memberInfo{
-    //成员退出提示
-    NSString *message = [NSString stringWithFormat:@"用户:%@ 退出房间",memberInfo[@"user_id"]];
-    [RNMyLib showMessageWithCode:900003 andMessage:message];
-    RNMyLib *sharedLib = [RNMyLib sharedLib];
-    if (sharedLib.userLeaveRoomCallback) {
-           sharedLib.userLeaveRoomCallback(memberInfo);
-    }
+    //新成员加入提示
+//    NSString *message = [NSString stringWithFormat:@"用户:%@ 加入房间",memberInfo[@"user_id"]];
+//    [RNMyLib showMessageWithCode:900003 andMessage:message];
 }
-
 #pragma mark - 异常提示
 + (void)showMessageWithCode:(NSInteger)code andMessage:(NSString *)message {
     
@@ -216,5 +194,6 @@ RCT_EXPORT_METHOD(setupUserLeaveRoomWithCallback:(RCTResponseSenderBlock)callbac
     
     [[UIApplication sharedApplication].delegate.window.rootViewController presentViewController:alertVC animated:YES completion:nil];
 }
+
 
 @end
