@@ -9,6 +9,7 @@
 #import "RNMyLib.h"
 
 #import "RNMyVideoView.h"
+#import "RNEventManager.h"
 
 @interface RNMyLib ()<UCloudRtcEngineDelegate>
 /// 可以订阅的远程流
@@ -141,7 +142,7 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
 
 
 /**流 状态回调*/
-- (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager didReceiveStreamStatus:(NSArray<UCloudRtcStreamStatsInfo*> *_Nonnull)status; {
+- (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager didReceiveStreamStatus:(NSArray<UCloudRtcStreamStatsInfo*> *_Nonnull)status{
     for (int i = 0 ; i < status.count; i ++) {
         UCloudRtcStreamStatsInfo *info = status[i];
         NSLog(@"streamInfo:  streamId = %@   userId = %@",info.streamId,info.userId);
@@ -164,6 +165,8 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     //新成员加入提示
 //    NSString *message = [NSString stringWithFormat:@"用户:%@ 加入房间",memberInfo[@"user_id"]];
 //    [RNMyLib showMessageWithCode:900002 andMessage:message];
+    // 发送事件
+    [RNEventManager sendEventWithName:@"event_memberDidJoinRoom" andBody:memberInfo];
 }
 
 /**成员退出*/
@@ -171,6 +174,9 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     //新成员加入提示
 //    NSString *message = [NSString stringWithFormat:@"用户:%@ 加入房间",memberInfo[@"user_id"]];
 //    [RNMyLib showMessageWithCode:900003 andMessage:message];
+    
+    // 发送事件
+    [RNEventManager sendEventWithName:@"event_memberDidLeaveRoom" andBody:memberInfo];
 }
 #pragma mark - 异常提示
 + (void)showMessageWithCode:(NSInteger)code andMessage:(NSString *)message {

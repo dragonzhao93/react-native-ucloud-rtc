@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D1392C7E242B40C500BC3815 /* UCloudRtcSdk_ios.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1392C7D242B40C500BC3815 /* UCloudRtcSdk_ios.framework */; };
+		D164DD612430375000357E7B /* RNEventManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D164DD602430375000357E7B /* RNEventManager.m */; };
 		D1EAB805242C849F00BB975E /* RNMyVideoViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D1EAB800242C849F00BB975E /* RNMyVideoViewManager.m */; };
 		D1EAB806242C849F00BB975E /* RNMyLib.m in Sources */ = {isa = PBXBuildFile; fileRef = D1EAB801242C849F00BB975E /* RNMyLib.m */; };
 		D1EAB807242C849F00BB975E /* RNMyVideoView.m in Sources */ = {isa = PBXBuildFile; fileRef = D1EAB803242C849F00BB975E /* RNMyVideoView.m */; };
@@ -28,6 +29,8 @@
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRNMyLibrary.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNMyLibrary.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1392C7D242B40C500BC3815 /* UCloudRtcSdk_ios.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = UCloudRtcSdk_ios.framework; sourceTree = "<group>"; };
+		D164DD5F2430375000357E7B /* RNEventManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNEventManager.h; sourceTree = "<group>"; };
+		D164DD602430375000357E7B /* RNEventManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNEventManager.m; sourceTree = "<group>"; };
 		D1EAB7FF242C849F00BB975E /* RNMyVideoView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNMyVideoView.h; sourceTree = "<group>"; };
 		D1EAB800242C849F00BB975E /* RNMyVideoViewManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNMyVideoViewManager.m; sourceTree = "<group>"; };
 		D1EAB801242C849F00BB975E /* RNMyLib.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNMyLib.m; sourceTree = "<group>"; };
@@ -70,6 +73,8 @@
 			children = (
 				D1EAB802242C849F00BB975E /* RNMyLib.h */,
 				D1EAB801242C849F00BB975E /* RNMyLib.m */,
+				D164DD5F2430375000357E7B /* RNEventManager.h */,
+				D164DD602430375000357E7B /* RNEventManager.m */,
 				D1EAB7FF242C849F00BB975E /* RNMyVideoView.h */,
 				D1EAB803242C849F00BB975E /* RNMyVideoView.m */,
 				D1EAB804242C849F00BB975E /* RNMyVideoViewManager.h */,
@@ -135,6 +140,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D164DD612430375000357E7B /* RNEventManager.m in Sources */,
 				D1EAB805242C849F00BB975E /* RNMyVideoViewManager.m in Sources */,
 				D1EAB806242C849F00BB975E /* RNMyLib.m in Sources */,
 				D1EAB807242C849F00BB975E /* RNMyVideoView.m in Sources */,
