@@ -86,8 +86,8 @@ RCT_EXPORT_METHOD(subscribeRemoteStream){
     RNMyLib *sharedLib = [RNMyLib sharedLib];
     [sharedLib.engine subscribeMethod:sharedLib.targetStream];
     // 渲染到指定视图
-    [sharedLib.targetStream renderOnView:[RNMyVideoView sharedView]];
-    NSLog(@"subscribeRemoteStream and  render");
+    //[sharedLib.targetStream renderOnView:[RNMyVideoView sharedView]];
+    //NSLog(@"subscribeRemoteStream and  render");
 }
 
 /// 取消订阅远程流
@@ -128,8 +128,12 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
 /**收到远程流*/
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager receiveRemoteStream:(UCloudRtcStream *_Nonnull)stream{
     [RNMyLib sharedLib].targetStream = stream;
-    // 渲染到指定视图
-    [[RNMyLib sharedLib].targetStream renderOnView:[RNMyVideoView sharedView]];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        // 需要在主线程执行的代码
+        // 渲染到指定视图
+        [[RNMyLib sharedLib].targetStream renderOnView:[RNMyVideoView sharedView]];
+    });
+    
 }
 
 /**非自动订阅模式下 可订阅流加入*/
