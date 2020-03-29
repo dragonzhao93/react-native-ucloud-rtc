@@ -61,7 +61,7 @@ andReject:(RCTPromiseRejectBlock)reject){
 /// 加入房间
 RCT_EXPORT_METHOD(joinRoomWithRoomid:(NSString *)roomid andUserid:(NSString *)userid andToken:(NSString *)token andResolve:(RCTPromiseResolveBlock)resolve
 andReject:(RCTPromiseRejectBlock)reject){
-    
+    [RNMyLib sharedLib].engine.isAutoSubscribe = NO;//取消自动订阅
     [[RNMyLib sharedLib].engine joinRoomWithRoomId:roomid userId:userid token:@"" completionHandler:^(NSDictionary * _Nonnull response, int errorCode) {
         NSLog(@"join room suceess!!!");
        // [[RNMyLib sharedLib].engine setLocalPreview:[RNMyVideoView sharedView]];
