@@ -18,12 +18,23 @@
 @property (nonatomic, strong) NSMutableArray<UCloudRtcStream*> *substreamList;
 /// 目标流
 @property (nonatomic, strong) UCloudRtcStream *targetStream;
-/// 是否开启事件监听
-@property (nonatomic, assign) BOOL hasListeners;
+
 @end
 
 
-@implementation RNMyLib
+@implementation RNMyLib{
+    BOOL _hasListeners;
+}
+
++(id)allocWithZone:(NSZone *)zone {
+  static RNMyLib *sharedInstance = nil;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    sharedInstance = [super allocWithZone:zone];
+  });
+  return sharedInstance;
+}
+
 +(instancetype)sharedLib {
     static id instance;
     static dispatch_once_t onceToken;
@@ -132,7 +143,7 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     
     BOOL isMainThread = [NSThread isMainThread];
     if (isMainThread) {
-      [sharedLib.targetStream renderOnView:[RNMyVideoView sharedView]];
+      [[RNMyLib sharedLib].targetStream renderOnView:[RNMyVideoView sharedView]];
     } else {
         dispatch_async(dispatch_get_main_queue(), ^{
             // 需要在主线程执行的代码
@@ -206,11 +217,11 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
 }
 
 - (void)startObserving {
-  hasListeners = YES;
+  _hasListeners = YES;
 }
 
 - (void)stopObserving {
-  hasListeners = NO;
+  _hasListeners = NO;
 }
 
 
@@ -238,4 +249,8 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
 }
 
 
+
+
+
 @end
+
