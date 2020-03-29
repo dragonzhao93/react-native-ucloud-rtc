@@ -15,7 +15,15 @@
     //static id instance;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        instance = [[self alloc] init];
+        
+        BOOL isMainThread = [NSThread isMainThread];
+        if (isMainThread) {
+          instance = [[self alloc] init];
+        } else {
+            dispatch_sync(dispatch_get_main_queue(), ^{
+               instance = [[self alloc] init];
+            });
+        }
     });
     return instance;
 }

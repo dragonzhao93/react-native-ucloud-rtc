@@ -10,6 +10,7 @@
 
 #if __has_include("RCTBridgeModule.h")
 #import "RCTBridgeModule.h"
+#import "RCTEventEmitter.h"
 #else
 #import <React/RCTBridgeModule.h>
 #endif
@@ -18,7 +19,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface RNMyLib : NSObject<RCTBridgeModule>
+@interface RNMyLib : RCTEventEmitter<RCTBridgeModule>
 /// 音视频实例
 @property (nonatomic, strong) UCloudRtcEngine *engine;
 

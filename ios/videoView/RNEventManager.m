@@ -10,6 +10,8 @@
 
 @implementation RNEventManager
 
+RCT_EXPORT_MODULE();
+
 +(instancetype)sharedEvent {
     static id instance;
     static dispatch_once_t onceToken;

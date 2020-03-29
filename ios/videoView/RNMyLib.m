@@ -9,7 +9,7 @@
 #import "RNMyLib.h"
 
 #import "RNMyVideoView.h"
-#import "RNEventManager.h"
+//#import "RNEventManager.h"
 
 @interface RNMyLib ()<UCloudRtcEngineDelegate>
 /// 可以订阅的远程流
@@ -18,6 +18,8 @@
 @property (nonatomic, strong) NSMutableArray<UCloudRtcStream*> *substreamList;
 /// 目标流
 @property (nonatomic, strong) UCloudRtcStream *targetStream;
+/// 是否开启事件监听
+@property (nonatomic, assign) BOOL hasListeners;
 @end
 
 
@@ -61,7 +63,7 @@ andReject:(RCTPromiseRejectBlock)reject){
 /// 加入房间
 RCT_EXPORT_METHOD(joinRoomWithRoomid:(NSString *)roomid andUserid:(NSString *)userid andToken:(NSString *)token andResolve:(RCTPromiseResolveBlock)resolve
 andReject:(RCTPromiseRejectBlock)reject){
-    [RNMyLib sharedLib].engine.isAutoSubscribe = NO;//取消自动订阅
+    //[RNMyLib sharedLib].engine.isAutoSubscribe = NO;//取消自动订阅
     [[RNMyLib sharedLib].engine joinRoomWithRoomId:roomid userId:userid token:@"" completionHandler:^(NSDictionary * _Nonnull response, int errorCode) {
         NSLog(@"join room suceess!!!");
        // [[RNMyLib sharedLib].engine setLocalPreview:[RNMyVideoView sharedView]];
@@ -86,8 +88,8 @@ RCT_EXPORT_METHOD(subscribeRemoteStream){
     RNMyLib *sharedLib = [RNMyLib sharedLib];
     [sharedLib.engine subscribeMethod:sharedLib.targetStream];
     // 渲染到指定视图
-    //[sharedLib.targetStream renderOnView:[RNMyVideoView sharedView]];
-    //NSLog(@"subscribeRemoteStream and  render");
+    [sharedLib.targetStream renderOnView:[RNMyVideoView sharedView]];
+    NSLog(@"subscribeRemoteStream and  render");
 }
 
 /// 取消订阅远程流
@@ -110,7 +112,6 @@ RCT_EXPORT_METHOD(unSubscribeLocalStream) {
 RCT_EXPORT_METHOD(startRecordLocalStreamWithType:(NSInteger)type) {
     UCloudRtcRecordConfig *config = [UCloudRtcRecordConfig new];
     config.mimetype = type;
-    
     RNMyLib *sharedLib = [RNMyLib sharedLib];
     [sharedLib.engine startRecord:config];
 }
@@ -128,12 +129,17 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
 /**收到远程流*/
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager receiveRemoteStream:(UCloudRtcStream *_Nonnull)stream{
     [RNMyLib sharedLib].targetStream = stream;
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        // 需要在主线程执行的代码
-        // 渲染到指定视图
-        [[RNMyLib sharedLib].targetStream renderOnView:[RNMyVideoView sharedView]];
-    });
     
+    BOOL isMainThread = [NSThread isMainThread];
+    if (isMainThread) {
+      [sharedLib.targetStream renderOnView:[RNMyVideoView sharedView]];
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            // 需要在主线程执行的代码
+            // 渲染到指定视图
+            [[RNMyLib sharedLib].targetStream renderOnView:[RNMyVideoView sharedView]];
+        });
+    }
 }
 
 /**非自动订阅模式下 可订阅流加入*/
@@ -149,7 +155,13 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager didReceiveStreamStatus:(NSArray<UCloudRtcStreamStatsInfo*> *_Nonnull)status{
     for (int i = 0 ; i < status.count; i ++) {
         UCloudRtcStreamStatsInfo *info = status[i];
-        NSLog(@"streamInfo:  streamId = %@   userId = %@",info.streamId,info.userId);
+        if ([info isKindOfClass:[UCloudRtcStreamStatsInfo class]]) {
+            NSLog(@"streamInfo:  streamId = %@   userId = %@",info.streamId,info.userId);
+            
+        } else {
+           NSLog(@"streamInfo: %@",info);
+        }
+        //NSLog(@"streamInfo:  streamId = %@   userId = %@",info.streamId,info.userId);
     }
 }
 
@@ -169,8 +181,9 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     //新成员加入提示
 //    NSString *message = [NSString stringWithFormat:@"用户:%@ 加入房间",memberInfo[@"user_id"]];
 //    [RNMyLib showMessageWithCode:900002 andMessage:message];
+    
     // 发送事件
-    [RNEventManager sendEventWithName:@"event_memberDidJoinRoom" andBody:memberInfo];
+    [self sendEventWithName:@"event_memberDidJoinRoom" body:memberInfo];
 }
 
 /**成员退出*/
@@ -180,8 +193,27 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
 //    [RNMyLib showMessageWithCode:900003 andMessage:message];
     
     // 发送事件
-    [RNEventManager sendEventWithName:@"event_memberDidLeaveRoom" andBody:memberInfo];
+    [self sendEventWithName:@"event_memberDidLeaveRoom" body:memberInfo];
 }
+
+#pragma mark - 事件配置
+- (NSArray<NSString *> *)supportedEvents {
+    // 事件注册
+    return @[
+      @"event_memberDidJoinRoom",
+      @"event_memberDidLeaveRoom"
+    ];
+}
+
+- (void)startObserving {
+  hasListeners = YES;
+}
+
+- (void)stopObserving {
+  hasListeners = NO;
+}
+
+
 #pragma mark - 异常提示
 + (void)showMessageWithCode:(NSInteger)code andMessage:(NSString *)message {
     
