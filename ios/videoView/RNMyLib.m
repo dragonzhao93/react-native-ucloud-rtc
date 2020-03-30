@@ -75,7 +75,8 @@ andReject:(RCTPromiseRejectBlock)reject){
 RCT_EXPORT_METHOD(joinRoomWithRoomid:(NSString *)roomid andUserid:(NSString *)userid andToken:(NSString *)token andResolve:(RCTPromiseResolveBlock)resolve
 andReject:(RCTPromiseRejectBlock)reject){
     //[RNMyLib sharedLib].engine.isAutoSubscribe = NO;//取消自动订阅
-    [[RNMyLib sharedLib].engine joinRoomWithRoomId:roomid userId:userid token:@"" completionHandler:^(NSDictionary * _Nonnull response, int errorCode) {
+    
+    [[RNMyLib sharedLib].engine joinRoomWithRoomId:roomid userId:userid token:token completionHandler:^(NSDictionary * _Nonnull response, int errorCode) {
         NSLog(@"join room suceess!!!");
        // [[RNMyLib sharedLib].engine setLocalPreview:[RNMyVideoView sharedView]];
         //[[RNMyLib sharedLib].engine.localStream renderOnView:[RNMyVideoView sharedView]];
@@ -99,7 +100,7 @@ RCT_EXPORT_METHOD(subscribeRemoteStream){
     RNMyLib *sharedLib = [RNMyLib sharedLib];
     [sharedLib.engine subscribeMethod:sharedLib.targetStream];
     // 渲染到指定视图
-    [sharedLib.targetStream renderOnView:[RNMyVideoView sharedView]];
+    //[sharedLib.targetStream renderOnView:[RNMyVideoView sharedView]];
     NSLog(@"subscribeRemoteStream and  render");
 }
 
