@@ -58,15 +58,15 @@ UCloudRtc.leaveRoom();
 ```
 #### 订阅远程流
  ```
- subscribeRemoteStream
+ UCloudRtc.subscribeRemoteStream()
  ```
 #### 取消订阅远程流
  ```
- unSubscribeRemoteStream
+ UCloudRtc.unSubscribeRemoteStream()
  ```
 #### 发布本地流
  ```
- subscribeLocalStream
+ UCloudRtc.subscribeLocalStream()
  ```
 #### 取消发布本地流
  ```
@@ -79,4 +79,17 @@ UCloudRtc.leaveRoom();
 #### 停止录制
  ```
  stopRecordLocalStream
+```
+
+### 事件监听
+```
+  const UCloudRtcEventEmitter = new NativeEventEmitter(UCloudRtc);
+
+  
+  UCloudRtcEventEmitter.addListener('event_memberDidJoinRoom', args => {
+    console.log('事件event_memberDidJoinRoom', args);
+  });
+  UCloudRtcEventEmitter.addListener('event_memberDidLeaveRoom', args => {
+    console.log('事件event_memberDidLeaveRoom', args);
+  });
 ```
