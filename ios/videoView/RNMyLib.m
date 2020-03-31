@@ -53,8 +53,11 @@
 RCT_EXPORT_MODULE()
 
 
-/// 通过appid和appkey初始化
-/// @param appkey
+/**
+ @brief 初始化UCloudRtcEngine
+ @param appid 分配得到的应用ID
+ @param appKey 分配得到的appkey
+ */
 RCT_EXPORT_METHOD(initWithAppid:(NSString *)appid andAppkey:(NSString *)appkey andResolve:(RCTPromiseResolveBlock)resolve
 andReject:(RCTPromiseRejectBlock)reject){
     
@@ -68,18 +71,17 @@ andReject:(RCTPromiseRejectBlock)reject){
     }];
     sharedLib.engine.isAutoPublish = NO;//加入房间后将自动发布本地音视频 默认为YES
     sharedLib.engine.delegate = sharedLib;
-    //[[sharedLib.engine] setPreviewMode:UCloudRtcVideoViewModeScaleAspectFit];
 }
 
-/// 加入房间
+/**
+ @brief 加入房间
+ @param roomid 即将加入的房间ID
+ @param userid 当前用户的ID
+ @param token  生成的token
+*/
 RCT_EXPORT_METHOD(joinRoomWithRoomid:(NSString *)roomid andUserid:(NSString *)userid andToken:(NSString *)token andResolve:(RCTPromiseResolveBlock)resolve
 andReject:(RCTPromiseRejectBlock)reject){
-    //[RNMyLib sharedLib].engine.isAutoSubscribe = NO;//取消自动订阅
-    
     [[RNMyLib sharedLib].engine joinRoomWithRoomId:roomid userId:userid token:token completionHandler:^(NSDictionary * _Nonnull response, int errorCode) {
-        NSLog(@"join room suceess!!!");
-       // [[RNMyLib sharedLib].engine setLocalPreview:[RNMyVideoView sharedView]];
-        //[[RNMyLib sharedLib].engine.localStream renderOnView:[RNMyVideoView sharedView]];
         NSLog(@"response:%@",response);
         NSLog(@"errorCode:%d",errorCode);
         if (errorCode) { // 加入房间失败
@@ -90,37 +92,48 @@ andReject:(RCTPromiseRejectBlock)reject){
     }];
 }
 
-/// 离开房间
+/**
+ @brief 退出房间
+*/
 RCT_EXPORT_METHOD(leaveRoom){
     [[RNMyLib sharedLib].engine leaveRoom];
 }
 
-/// 订阅远程流
+/**
+ @brief 订阅远程流
+*/
 RCT_EXPORT_METHOD(subscribeRemoteStream){
     RNMyLib *sharedLib = [RNMyLib sharedLib];
     [sharedLib.engine subscribeMethod:sharedLib.targetStream];
-    // 渲染到指定视图
-    //[sharedLib.targetStream renderOnView:[RNMyVideoView sharedView]];
-    NSLog(@"subscribeRemoteStream and  render");
+    NSLog(@"subscribeRemoteStream");
 }
 
-/// 取消订阅远程流
+/**
+ @brief 取消订阅远程流
+*/
 RCT_EXPORT_METHOD(unSubscribeRemoteStream){
     RNMyLib *sharedLib = [RNMyLib sharedLib];
     [sharedLib.engine unSubscribeMethod:sharedLib.targetStream];
 }
 
-/// 发布本地流
+/**
+ @brief 发布本地流
+*/
 RCT_EXPORT_METHOD(subscribeLocalStream) {
     [[RNMyLib sharedLib].engine publish];
 }
 
-/// 取消发布本地流
+/**
+ @brief 取消发布本地流
+*/
 RCT_EXPORT_METHOD(unSubscribeLocalStream) {
     [[RNMyLib sharedLib].engine unPublish];
 }
 
-/// //录制类型  1 音频 2 视频 3 音频+视频
+/**
+ @brief 录制
+ @param type 录制类型 1音频 2 视频 3 音视频
+*/
 RCT_EXPORT_METHOD(startRecordLocalStreamWithType:(NSInteger)type) {
     UCloudRtcRecordConfig *config = [UCloudRtcRecordConfig new];
     config.mimetype = type;
@@ -128,13 +141,13 @@ RCT_EXPORT_METHOD(startRecordLocalStreamWithType:(NSInteger)type) {
     [sharedLib.engine startRecord:config];
 }
 
-
-/// 停止录制
+/**
+@brief 停止录制
+*/
 RCT_EXPORT_METHOD(stopRecordLocalStream) {
     RNMyLib *sharedLib = [RNMyLib sharedLib];
     [sharedLib.engine stopRecord];
 }
-
 
 #pragma mark - UCloudRtcEngineDelegate
 
@@ -147,7 +160,6 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
       [[RNMyLib sharedLib].targetStream renderOnView:[RNMyVideoView sharedView]];
     } else {
         dispatch_async(dispatch_get_main_queue(), ^{
-            // 需要在主线程执行的代码
             // 渲染到指定视图
             [[RNMyLib sharedLib].targetStream renderOnView:[RNMyVideoView sharedView]];
         });
@@ -162,18 +174,15 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     [sharedLib.targetStream renderOnView:[RNMyVideoView sharedView]];
 }
 
-
 /**流 状态回调*/
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager didReceiveStreamStatus:(NSArray<UCloudRtcStreamStatsInfo*> *_Nonnull)status{
     for (int i = 0 ; i < status.count; i ++) {
         UCloudRtcStreamStatsInfo *info = status[i];
         if ([info isKindOfClass:[UCloudRtcStreamStatsInfo class]]) {
             NSLog(@"streamInfo:  streamId = %@   userId = %@",info.streamId,info.userId);
-            
         } else {
            NSLog(@"streamInfo: %@",info);
         }
-        //NSLog(@"streamInfo:  streamId = %@   userId = %@",info.streamId,info.userId);
     }
 }
 
@@ -190,20 +199,12 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
 
 /**新成员加入*/
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager memberDidJoinRoom:(NSDictionary *_Nonnull)memberInfo{
-    //新成员加入提示
-//    NSString *message = [NSString stringWithFormat:@"用户:%@ 加入房间",memberInfo[@"user_id"]];
-//    [RNMyLib showMessageWithCode:900002 andMessage:message];
-    
     // 发送事件
     [self sendEventWithName:@"event_memberDidJoinRoom" body:memberInfo];
 }
 
 /**成员退出*/
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager memberDidLeaveRoom:(NSDictionary *_Nonnull)memberInfo{
-    //新成员加入提示
-//    NSString *message = [NSString stringWithFormat:@"用户:%@ 加入房间",memberInfo[@"user_id"]];
-//    [RNMyLib showMessageWithCode:900003 andMessage:message];
-    
     // 发送事件
     [self sendEventWithName:@"event_memberDidLeaveRoom" body:memberInfo];
 }

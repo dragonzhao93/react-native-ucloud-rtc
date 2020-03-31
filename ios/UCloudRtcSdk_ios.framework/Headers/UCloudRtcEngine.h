@@ -62,6 +62,14 @@ typedef NS_ENUM(NSInteger,UCloudRtcEnginePublishState) {
     UCloudRtcEnginePublishStatePublishStoped,
 };
 
+typedef NS_ENUM(NSInteger, UCloudRtcConnectState) {
+    UCloudRtcConnectStateDisConnect,//连接断开
+    UCloudRtcConnectStateConnecting,//连接中
+    UCloudRtcConnectStateConnected,//连接成功
+    UCloudRtcConnectStateConnectFailed,//连接失败
+    UCloudRtcConnectStateReConnected//重连成功
+};
+
 /** 本地预览视频视图的模式 */
 typedef NS_ENUM(NSInteger,UCloudRtcVideoViewMode) {
     /** 等比缩放，可能有黑边 */
@@ -136,6 +144,25 @@ typedef NS_ENUM(NSInteger,UCloudRtcVideoViewMode) {
 /**媒体播放器播放结束的回调*/
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)channel mediaPlayerOnPlayEnd:(BOOL)isEnd;
 
+/**网络连接状态变化的回调*/
+- (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager connectState:(UCloudRtcConnectState)connectState;
+/**
+ @brief 监听本地采集的音频音量变化，范围是(0-100)
+ @discussion 该值不是真正的系统音量值，只是反映音量变化的一个指标
+ 
+ @param volume 音量值
+ */
+- (void)localAudioVolumeChange:(int)volume;
+
+/**
+ @brief 监听远端流音频音量变化，范围是(0-100)
+ @discussion 该值只是反映音量变化的一个指标
+ 
+ @param volume 音量值
+ @param uId  userid
+ */
+- (void)remoteAudioVolumeChange:(int)volume userID:(NSString *_Nonnull)uId;
+
 @end
 
 @interface UCloudRtcEngine : NSObject
@@ -188,6 +215,11 @@ typedef NS_ENUM(NSInteger,UCloudRtcVideoViewMode) {
 
 @property (nonatomic, copy) NSString *outputpath;//混音文件路径
 
+/**断网重连次数 默认为：10次 */
+@property (nonatomic, assign) NSInteger reConnectTimes;
+
+/**重连时间间隔，默认60秒钟*/
+@property(nonatomic, assign) NSInteger overTime;
 
 /**
  @brief 返回SDK当前版本号
@@ -351,11 +383,11 @@ typedef NS_ENUM(NSInteger,UCloudRtcVideoViewMode) {
 - (void)stopRecord;
 
 /**
-@brief 开始本地录制
+ @brief 本地视频录制
  
-@param recordConfig 本地录制参数配置
-*/
-- (void)startNativeRecord:(NSDictionary *_Nonnull)recordConfig;
+ @discussion 会根据你选择的视频分辨率进行录制，默认是 480 X 360
+ */
+- (void)startNativeReord;
 
 /**
 @brief 停止本地录制
@@ -412,4 +444,36 @@ typedef NS_ENUM(NSInteger,UCloudRtcVideoViewMode) {
 @param customCommand 自定义消息内容
 */
 - (void)sendCustomCommand:(NSString *_Nonnull)customCommand;
+
+
+/**
+ @brief 停止音频播放
+ 
+ @discussion 停止的是远端音频播放
+ 
+ */
+- (void)stopAudioPlay;
+
+/**
+ @brief 开始音频播放
+ 
+ @discussion 开始的是远端音频播放
+ 
+ */
+- (void)startAudioPlay;
+
+
+/**
+ @brief 停止音视频的采集和播放
+ 
+ @discussion 如果你的应用没有后台模式，那么当点击home键应用退到后台时，可以调用此方法停止音频和视频的采集以及远端音频的播放。
+ */
+- (void)stopAVCollectionAndPaly;
+
+/**
+ @brief 开始音频的采集和播放
+ 
+ @discussion 和上面的`- (void)stopAVCollectionAndPaly`方法对应，当app重新进入活跃状态时，调用该方法恢复本地音视频的采集和远端音频的播放。
+ */
+- (void)startAVCollectionAndPaly;
 @end
