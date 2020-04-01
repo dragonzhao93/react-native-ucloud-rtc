@@ -46,7 +46,12 @@ UCloudRtc.initWithAppid(appid, appKey).then(res => {
 ```
 #### 加入房间 joinRoomWithRoomid
 ```
-UCloudRtc.joinRoomWithRoomid(roomId, userId, token).then(res => {
+roomId:房间号
+userId:用户ID
+token:token
+OnlyAudio:是否只推送音频
+
+UCloudRtc.joinRoomWithRoomid(roomId, userId, token, false).then(res => {
     console.log('收到回调', res);
   }).catch(err => {
     console.log('捕获异常', err);
