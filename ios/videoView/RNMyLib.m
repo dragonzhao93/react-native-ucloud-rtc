@@ -80,6 +80,8 @@ andReject:(RCTPromiseRejectBlock)reject){
         }
     }];
     sharedLib.engine.delegate = sharedLib;
+    sharedLib.engine.isAutoPublish = NO;
+    
 }
 
 /**
@@ -88,12 +90,14 @@ andReject:(RCTPromiseRejectBlock)reject){
  @param userid 当前用户的ID
  @param token  生成的token
 */
-RCT_EXPORT_METHOD(joinRoomWithRoomid:(NSString *)roomid andUserid:(NSString *)userid andToken:(NSString *)token andResolve:(RCTPromiseResolveBlock)resolve
+RCT_EXPORT_METHOD(joinRoomWithRoomid:(NSString *)roomid andUserid:(NSString *)userid andToken:(NSString *)token andOnlyAudio:(BOOL)onlyAudio andResolve:(RCTPromiseResolveBlock)resolve
 andReject:(RCTPromiseRejectBlock)reject){
     //设置本地预览模式：等比缩放填充整View，可能有部分被裁减
     [[RNMyLib sharedLib].engine setPreviewMode:UCloudRtcVideoViewModeScaleAspectFill];
     //设置远端预览模式：等比缩放填充整View，可能有部分被裁减
     [[RNMyLib sharedLib].engine setRemoteViewMode:UCloudRtcVideoViewModeScaleAspectFill];
+    // 设置纯音频
+    [RNMyLib sharedLib].engine.isOnlyAudio = onlyAudio;
     [[RNMyLib sharedLib].engine joinRoomWithRoomId:roomid userId:userid token:token completionHandler:^(NSDictionary * _Nonnull response, int errorCode) {
         NSLog(@"response:%@",response);
         NSLog(@"errorCode:%d",errorCode);
@@ -135,8 +139,7 @@ RCT_EXPORT_METHOD(unSubscribeRemoteStream){
  @brief 发布本地流
  @param cameraEnable设置本地流是否启用相机(YES为音视频  NO是纯音频)
 */
-RCT_EXPORT_METHOD(subscribeLocalStreamWithCameraEnable:(BOOL)cameraEnable){
-    [[RNMyLib sharedLib].engine openCamera:cameraEnable];
+RCT_EXPORT_METHOD(subscribeLocalStream){
     [[RNMyLib sharedLib].engine publish];
     [[RNMyLib sharedLib].engine setLocalPreview:[RNMyVideoView sharedView]];
 }
