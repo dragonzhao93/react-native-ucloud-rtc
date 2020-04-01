@@ -19,16 +19,6 @@
 /// 目标流
 @property (nonatomic, strong) UCloudRtcStream *targetStream;
 
-// 初始化
-/// appid
-//@property (nonatomic, copy) NSString *appid;
-/// appkey
-//@property (nonatomic, copy) NSString *appkey;
-/// 初始化成功的回调
-//@property (nonatomic, copy) RCTPromiseResolveBlock initResolve;
-/// 初始化失败的回调
-//@property (nonatomic, copy) RCTPromiseRejectBlock initReject;
-
 @end
 
 
@@ -68,10 +58,6 @@ RCT_EXPORT_MODULE()
 RCT_EXPORT_METHOD(initWithAppid:(NSString *)appid andAppkey:(NSString *)appkey andResolve:(RCTPromiseResolveBlock)resolve
 andReject:(RCTPromiseRejectBlock)reject){
     RNMyLib *sharedLib = [RNMyLib sharedLib];
-    //sharedLib.appid = appid;
-    //sharedLib.appkey = appkey;
-    //sharedLib.initResolve = resolve;
-    //sharedLib.initReject = reject;
     sharedLib.engine = [[UCloudRtcEngine alloc]initWithAppID:appid appKey:appkey completionBlock:^(int errorCode) {
         if (errorCode) {
             reject(@(errorCode).stringValue,@"init fail", nil);
@@ -114,8 +100,6 @@ andReject:(RCTPromiseRejectBlock)reject){
 */
 RCT_EXPORT_METHOD(leaveRoom){
     [[RNMyLib sharedLib].engine leaveRoom];
-    // 释放engine
-    //[RNMyLib sharedLib].engine = nil;
 }
 
 /**
@@ -177,11 +161,12 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
 
     BOOL isMainThread = [NSThread isMainThread];
     if (isMainThread) {
-      [stream renderOnView:[RNMyVideoView sharedView]];
+        // 渲染到指定视图
+        [self renderView:stream];
     } else {
         dispatch_async(dispatch_get_main_queue(), ^{
             // 渲染到指定视图
-            [stream renderOnView:[RNMyVideoView sharedView]];
+            [self renderView:stream];
         });
     }
 }
@@ -244,29 +229,18 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
   _hasListeners = NO;
 }
 
-/*
-#pragma mark - 懒加载engine
-- (UCloudRtcEngine *)engine {
-    if (_engine) {
-        UCloudRtcEngine *engine = [[UCloudRtcEngine alloc]initWithAppID:self.appid appKey:self.appkey completionBlock:^(int errorCode) {
-            if (errorCode) {
-                if (!self.initReject) {
-                    return;
-                }
-                self.initReject(@(errorCode).stringValue,@"init fail", nil);
-            } else {
-                if (!self.initResolve) {
-                    return;
-                }
-                self.initResolve(@"init success");
-            }
-        }];
-        engine.delegate = self;
-        _engine = engine;
+/**渲染视图*/
+-(void)renderView:(UCloudRtcStream *_Nonnull)stream{
+    if ([[RNMyVideoView sharedView] subviews] != 0) {
+        [[[RNMyVideoView sharedView] subviews]makeObjectsPerformSelector:@selector(removeFromSuperview)];
     }
-    return _engine;
+    UIView *view = [[UIView alloc]init];
+    view.frame = [RNMyVideoView sharedView].bounds;
+    [[RNMyVideoView sharedView] addSubview:view];
+    [stream renderOnView:view];
+    
 }
-*/
+
 #pragma mark - 异常提示
 + (void)showMessageWithCode:(NSInteger)code andMessage:(NSString *)message {
     
