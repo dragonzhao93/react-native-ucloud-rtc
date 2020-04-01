@@ -174,10 +174,7 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
 
 /**收到远程流*/
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager receiveRemoteStream:(UCloudRtcStream *_Nonnull)stream{
-    NSLog(@"[RNMyLib sharedLib].engine: %@",[RNMyLib sharedLib].engine);
-    NSLog(@"stream: %@",stream);
-    NSLog(@"manager: %@",manager);
-    [RNMyVideoView releaseView];
+
     BOOL isMainThread = [NSThread isMainThread];
     if (isMainThread) {
       [stream renderOnView:[RNMyVideoView sharedView]];

@@ -33,10 +33,5 @@ static dispatch_once_t onceToken;
   [super willMoveToSuperview:newSuperview];
 }
 
-// 释放View
-+ (void)releaseView {
-    onceToken = 0;
-    instance = nil;
-}
 
 @end
