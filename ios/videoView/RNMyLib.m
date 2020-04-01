@@ -177,6 +177,7 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     NSLog(@"[RNMyLib sharedLib].engine: %@",[RNMyLib sharedLib].engine);
     NSLog(@"stream: %@",stream);
     NSLog(@"manager: %@",manager);
+    [RNMyVideoView releaseView];
     BOOL isMainThread = [NSThread isMainThread];
     if (isMainThread) {
       [stream renderOnView:[RNMyVideoView sharedView]];

@@ -10,12 +10,11 @@
 
 @implementation RNMyVideoView
 
+
+static RNMyVideoView *instance;
+static dispatch_once_t onceToken;
 + (instancetype)sharedView {
-    static RNMyVideoView *instance;
-    //static id instance;
-    static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        
         BOOL isMainThread = [NSThread isMainThread];
         if (isMainThread) {
           instance = [[self alloc] init];
@@ -32,6 +31,12 @@
 #pragma mark - willMoveToSuperview
 -(void) willMoveToSuperview:(UIView *)newSuperview {
   [super willMoveToSuperview:newSuperview];
+}
+
+// 释放View
++ (void)releaseView {
+    onceToken = 0;
+    instance = nil;
 }
 
 @end
