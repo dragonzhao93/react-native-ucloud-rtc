@@ -174,7 +174,9 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
 
 /**收到远程流*/
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager receiveRemoteStream:(UCloudRtcStream *_Nonnull)stream{
-    
+    NSLog(@"[RNMyLib sharedLib].engine: %@",[RNMyLib sharedLib].engine);
+    NSLog(@"stream: %@",stream);
+    NSLog(@"manager: %@",manager);
     BOOL isMainThread = [NSThread isMainThread];
     if (isMainThread) {
       [stream renderOnView:[RNMyVideoView sharedView]];
@@ -188,10 +190,8 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
 
 /**非自动订阅模式下 可订阅流加入*/
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)channel newStreamHasJoinRoom:(UCloudRtcStream *_Nonnull)stream {
-    [RNMyLib sharedLib].targetStream = stream;
     // 渲染到指定视图
-    RNMyLib *sharedLib = [RNMyLib sharedLib];
-    [sharedLib.targetStream renderOnView:[RNMyVideoView sharedView]];
+    [stream renderOnView:[RNMyVideoView sharedView]];
 }
 
 /**流 状态回调*/
@@ -268,10 +268,7 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     }
     return _engine;
 }
- */
-
-
-
+*/
 #pragma mark - 异常提示
 + (void)showMessageWithCode:(NSInteger)code andMessage:(NSString *)message {
     
