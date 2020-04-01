@@ -21,13 +21,13 @@
 
 // 初始化
 /// appid
-@property (nonatomic, copy) NSString *appid;
+//@property (nonatomic, copy) NSString *appid;
 /// appkey
-@property (nonatomic, copy) NSString *appkey;
+//@property (nonatomic, copy) NSString *appkey;
 /// 初始化成功的回调
-@property (nonatomic, copy) RCTPromiseResolveBlock initResolve;
+//@property (nonatomic, copy) RCTPromiseResolveBlock initResolve;
 /// 初始化失败的回调
-@property (nonatomic, copy) RCTPromiseRejectBlock initReject;
+//@property (nonatomic, copy) RCTPromiseRejectBlock initReject;
 
 @end
 
@@ -68,10 +68,10 @@ RCT_EXPORT_MODULE()
 RCT_EXPORT_METHOD(initWithAppid:(NSString *)appid andAppkey:(NSString *)appkey andResolve:(RCTPromiseResolveBlock)resolve
 andReject:(RCTPromiseRejectBlock)reject){
     RNMyLib *sharedLib = [RNMyLib sharedLib];
-    sharedLib.appid = appid;
-    sharedLib.appkey = appkey;
-    sharedLib.initResolve = resolve;
-    sharedLib.initReject = reject;
+    //sharedLib.appid = appid;
+    //sharedLib.appkey = appkey;
+    //sharedLib.initResolve = resolve;
+    //sharedLib.initReject = reject;
     sharedLib.engine = [[UCloudRtcEngine alloc]initWithAppID:appid appKey:appkey completionBlock:^(int errorCode) {
         if (errorCode) {
             reject(@(errorCode).stringValue,@"init fail", nil);
@@ -111,7 +111,7 @@ andReject:(RCTPromiseRejectBlock)reject){
 RCT_EXPORT_METHOD(leaveRoom){
     [[RNMyLib sharedLib].engine leaveRoom];
     // 释放engine
-    [RNMyLib sharedLib].engine = nil;
+    //[RNMyLib sharedLib].engine = nil;
 }
 
 /**
@@ -243,6 +243,7 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
   _hasListeners = NO;
 }
 
+/*
 #pragma mark - 懒加载engine
 - (UCloudRtcEngine *)engine {
     if (_engine) {
@@ -264,6 +265,7 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     }
     return _engine;
 }
+ */
 
 
 
