@@ -19,6 +19,16 @@
 /// 目标流
 @property (nonatomic, strong) UCloudRtcStream *targetStream;
 
+// 初始化
+/// appid
+@property (nonatomic, copy) NSString *appid;
+/// appkey
+@property (nonatomic, copy) NSString *appkey;
+/// 初始化成功的回调
+@property (nonatomic, copy) RCTPromiseResolveBlock initResolve;
+/// 初始化失败的回调
+@property (nonatomic, copy) RCTPromiseRejectBlock initReject;
+
 @end
 
 
@@ -44,14 +54,11 @@
     return instance;
 }
 
-- (dispatch_queue_t)methodQueue
-{
+- (dispatch_queue_t)methodQueue{
     return dispatch_get_main_queue();
 }
 
-
 RCT_EXPORT_MODULE()
-
 
 /**
  @brief 初始化UCloudRtcEngine
@@ -60,8 +67,11 @@ RCT_EXPORT_MODULE()
  */
 RCT_EXPORT_METHOD(initWithAppid:(NSString *)appid andAppkey:(NSString *)appkey andResolve:(RCTPromiseResolveBlock)resolve
 andReject:(RCTPromiseRejectBlock)reject){
-    
     RNMyLib *sharedLib = [RNMyLib sharedLib];
+    sharedLib.appid = appid;
+    sharedLib.appkey = appkey;
+    sharedLib.initResolve = resolve;
+    sharedLib.initReject = reject;
     sharedLib.engine = [[UCloudRtcEngine alloc]initWithAppID:appid appKey:appkey completionBlock:^(int errorCode) {
         if (errorCode) {
             reject(@(errorCode).stringValue,@"init fail", nil);
@@ -69,7 +79,6 @@ andReject:(RCTPromiseRejectBlock)reject){
             resolve(@"init success");
         }
     }];
-    sharedLib.engine.isAutoPublish = NO;//加入房间后将自动发布本地音视频 默认为YES
     sharedLib.engine.delegate = sharedLib;
 }
 
@@ -81,6 +90,10 @@ andReject:(RCTPromiseRejectBlock)reject){
 */
 RCT_EXPORT_METHOD(joinRoomWithRoomid:(NSString *)roomid andUserid:(NSString *)userid andToken:(NSString *)token andResolve:(RCTPromiseResolveBlock)resolve
 andReject:(RCTPromiseRejectBlock)reject){
+    //设置本地预览模式：等比缩放填充整View，可能有部分被裁减
+    [[RNMyLib sharedLib].engine setPreviewMode:UCloudRtcVideoViewModeScaleAspectFill];
+    //设置远端预览模式：等比缩放填充整View，可能有部分被裁减
+    [[RNMyLib sharedLib].engine setRemoteViewMode:UCloudRtcVideoViewModeScaleAspectFill];
     [[RNMyLib sharedLib].engine joinRoomWithRoomId:roomid userId:userid token:token completionHandler:^(NSDictionary * _Nonnull response, int errorCode) {
         NSLog(@"response:%@",response);
         NSLog(@"errorCode:%d",errorCode);
@@ -97,6 +110,8 @@ andReject:(RCTPromiseRejectBlock)reject){
 */
 RCT_EXPORT_METHOD(leaveRoom){
     [[RNMyLib sharedLib].engine leaveRoom];
+    // 释放engine
+    [RNMyLib sharedLib].engine = nil;
 }
 
 /**
@@ -118,9 +133,12 @@ RCT_EXPORT_METHOD(unSubscribeRemoteStream){
 
 /**
  @brief 发布本地流
+ @param cameraEnable设置本地流是否启用相机(YES为音视频  NO是纯音频)
 */
-RCT_EXPORT_METHOD(subscribeLocalStream) {
+RCT_EXPORT_METHOD(subscribeLocalStreamWithCameraEnable:(BOOL)cameraEnable){
+    [[RNMyLib sharedLib].engine openCamera:cameraEnable];
     [[RNMyLib sharedLib].engine publish];
+    [[RNMyLib sharedLib].engine setLocalPreview:[RNMyVideoView sharedView]];
 }
 
 /**
@@ -153,15 +171,14 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
 
 /**收到远程流*/
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager receiveRemoteStream:(UCloudRtcStream *_Nonnull)stream{
-    [RNMyLib sharedLib].targetStream = stream;
     
     BOOL isMainThread = [NSThread isMainThread];
     if (isMainThread) {
-      [[RNMyLib sharedLib].targetStream renderOnView:[RNMyVideoView sharedView]];
+      [stream renderOnView:[RNMyVideoView sharedView]];
     } else {
         dispatch_async(dispatch_get_main_queue(), ^{
             // 渲染到指定视图
-            [[RNMyLib sharedLib].targetStream renderOnView:[RNMyVideoView sharedView]];
+            [stream renderOnView:[RNMyVideoView sharedView]];
         });
     }
 }
@@ -225,6 +242,29 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
 - (void)stopObserving {
   _hasListeners = NO;
 }
+
+#pragma mark - 懒加载engine
+- (UCloudRtcEngine *)engine {
+    if (_engine) {
+        UCloudRtcEngine *engine = [[UCloudRtcEngine alloc]initWithAppID:self.appid appKey:self.appkey completionBlock:^(int errorCode) {
+            if (errorCode) {
+                if (!self.initReject) {
+                    return;
+                }
+                self.initReject(@(errorCode).stringValue,@"init fail", nil);
+            } else {
+                if (!self.initResolve) {
+                    return;
+                }
+                self.initResolve(@"init success");
+            }
+        }];
+        engine.delegate = self;
+        _engine = engine;
+    }
+    return _engine;
+}
+
 
 
 #pragma mark - 异常提示
