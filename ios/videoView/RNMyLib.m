@@ -57,21 +57,28 @@ RCT_EXPORT_MODULE()
  @param appid 分配得到的应用ID
  @param appKey 分配得到的appkey
  */
-RCT_EXPORT_METHOD(initWithAppid:(NSString *)appid andAppkey:(NSString *)appkey andResolve:(RCTPromiseResolveBlock)resolve
+RCT_EXPORT_METHOD(initWithAppid:(NSString *)appid andAppkey:(NSString *)appkey andDebug:(BOOL)isDebug andResolve:(RCTPromiseResolveBlock)resolve
 andReject:(RCTPromiseRejectBlock)reject){
     RNMyLib *sharedLib = [RNMyLib sharedLib];
     if (nil==sharedLib.engine) {
         sharedLib.engine = [[UCloudRtcEngine alloc]initWithAppID:appid appKey:appkey completionBlock:^(int errorCode) {
-            if (errorCode) {
+            if (errorCode && reject) {
                 reject(@(errorCode).stringValue,@"init fail", nil);
             } else {
+                if (!resolve) {
+                    return;
+                }
                 resolve(@"init success");
             }
         }];
     }
     sharedLib.engine.delegate = sharedLib;
     sharedLib.engine.isAutoPublish = NO;
-    
+    //打印日志开关
+    UCloudRtcLog *logger = [UCloudRtcLog new];
+    LogLevel logLevel = isDebug?UCloudRtcLogLevel_DEBUG:UCloudRtcLogLevel_OFF;
+    [logger setLogLevel:logLevel];
+    sharedLib.engine.logger = logger;
 }
 
 /**
@@ -89,9 +96,12 @@ andReject:(RCTPromiseRejectBlock)reject){
     [[RNMyLib sharedLib].engine joinRoomWithRoomId:roomid userId:userid token:token completionHandler:^(NSDictionary * _Nonnull response, int errorCode) {
         NSLog(@"response:%@",response);
         NSLog(@"errorCode:%d",errorCode);
-        if (errorCode) { // 加入房间失败
+        if (errorCode && reject){ // 加入房间失败
             reject(@(errorCode).stringValue,@"joinRoom fail", nil);
-        } else { //加入房间成功
+        }else{ //加入房间成功
+            if (!resolve){
+                return;
+            }
             resolve(@"joinRoom success");
         }
     }];
@@ -163,7 +173,6 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
 
 /**收到远程流*/
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager receiveRemoteStream:(UCloudRtcStream *_Nonnull)stream{
-
     BOOL isMainThread = [NSThread isMainThread];
     if (isMainThread) {
         // 渲染到指定视图
@@ -183,7 +192,6 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
  @param uId  userid
  */
 - (void)remoteAudioVolumeChange:(int)volume userID:(NSString *_Nonnull)uId {
-    
     // 发送事件
     [self sendEventWithName:@"event_remoteVolumeChange" body:@{@"volume":@(volume),@"userid":uId}];
 }
@@ -229,6 +237,7 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     [self sendEventWithName:@"event_memberDidLeaveRoom" body:memberInfo];
 }
 
+#pragma mark - 懒加载view
 - (UIView*)localPreview {
     if (!_localPreview) {
         UIView *localPreview = [UIView new];
@@ -255,7 +264,12 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
   _hasListeners = NO;
 }
 
-/**渲染视图*/
+/**渲染视图
+ *[RNMyVideoView sharedView]  父视图，
+ *view 子视图
+ *渲染前移除父视图上所有子视图
+ *初始化view加到父视图上，远端流渲染到子视图上
+ */
 -(void)renderView:(UCloudRtcStream *_Nonnull)stream{
     if ([[RNMyVideoView sharedView] subviews] != 0) {
         [[[RNMyVideoView sharedView] subviews]makeObjectsPerformSelector:@selector(removeFromSuperview)];
