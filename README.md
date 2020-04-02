@@ -38,7 +38,10 @@ UCloudRtc.initWithAppid(appid, appKey);
 ## API
 #### 初始化 initWithAppid
 ```
-UCloudRtc.initWithAppid(appid, appKey).then(res => {
+appid: appid,
+appKey: appKey,
+isDebug: 是否开启日志, true-开启、false-关闭
+UCloudRtc.initWithAppid(appid, appKey, isDebug).then(res => {
     console.log('收到回调', res);
   }).catch(err => {
     console.log('捕获异常', err);
@@ -46,12 +49,7 @@ UCloudRtc.initWithAppid(appid, appKey).then(res => {
 ```
 #### 加入房间 joinRoomWithRoomid
 ```
-roomId:房间号
-userId:用户ID
-token:token
-OnlyAudio:是否只推送音频
-
-UCloudRtc.joinRoomWithRoomid(roomId, userId, token, false).then(res => {
+UCloudRtc.joinRoomWithRoomid(roomId, userId, token).then(res => {
     console.log('收到回调', res);
   }).catch(err => {
     console.log('捕获异常', err);
@@ -71,23 +69,28 @@ UCloudRtc.leaveRoom();
  ```
 #### 发布本地流
  ```
- UCloudRtc.subscribeLocalStream()
+ flag: 是否开启摄像头 true-推送音视频流 false-仅推送音频
+ UCloudRtc.subscribeLocalStreamWithCameraEnable(flag)
  ```
 #### 取消发布本地流
  ```
- unSubscribeLocalStream
+ UCloudRtc.unSubscribeLocalStream()
  ```
 #### 录制音视频
  ```
- startRecordLocalStreamWithType
+ UCloudRtc.startRecordLocalStreamWithType()
  ```
 #### 停止录制
  ```
- stopRecordLocalStream
+ UCloudRtc.stopRecordLocalStream()
 ```
 
 ### 事件监听
 ```
+  event_memberDidJoinRoom：用户进入房间
+  event_memberDidLeaveRoom：用户离开房间
+  event_remoteVolumeChange：声音变化回调
+
   const UCloudRtcEventEmitter = new NativeEventEmitter(UCloudRtc);
 
   
@@ -96,5 +99,8 @@ UCloudRtc.leaveRoom();
   });
   UCloudRtcEventEmitter.addListener('event_memberDidLeaveRoom', args => {
     console.log('事件event_memberDidLeaveRoom', args);
+  });
+  UCloudRtcEventEmitter.addListener('event_remoteVolumeChange', args => {
+    console.log('事件event_remoteVolumeChange', args);
   });
 ```
