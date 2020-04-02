@@ -176,6 +176,18 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     }
 }
 
+/**
+ @brief 监听远端流音频音量变化，范围是(0-100)
+ @discussion 该值只是反映音量变化的一个指标
+ @param volume 音量值
+ @param uId  userid
+ */
+- (void)remoteAudioVolumeChange:(int)volume userID:(NSString *_Nonnull)uId {
+    
+    // 发送事件
+    [self sendEventWithName:@"event_remoteVolumeChange" body:@{@"volume":@(volume),@"userid":uId}];
+}
+
 /**非自动订阅模式下 可订阅流加入*/
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)channel newStreamHasJoinRoom:(UCloudRtcStream *_Nonnull)stream {
     // 渲染到指定视图
@@ -230,7 +242,8 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     // 事件注册
     return @[
       @"event_memberDidJoinRoom",
-      @"event_memberDidLeaveRoom"
+      @"event_memberDidLeaveRoom",
+      @"event_remoteVolumeChange"
     ];
 }
 
