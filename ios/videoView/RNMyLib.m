@@ -18,6 +18,8 @@
 @property (nonatomic, strong) NSMutableArray<UCloudRtcStream*> *substreamList;
 /// 目标流
 @property (nonatomic, strong) UCloudRtcStream *targetStream;
+/// 展示预览图
+@property (nonatomic, strong) UIView *localPreview;
 
 @end
 
@@ -124,9 +126,10 @@ RCT_EXPORT_METHOD(unSubscribeRemoteStream){
  @param cameraEnable设置本地流是否启用相机(YES为音视频  NO是纯音频)
 */
 RCT_EXPORT_METHOD(subscribeLocalStreamWithCameraEnable:(BOOL)cameraEnable){
-    [[RNMyLib sharedLib].engine openCamera:cameraEnable];
-    [[RNMyLib sharedLib].engine publish];
-    //[[RNMyLib sharedLib].engine setLocalPreview:[RNMyVideoView sharedView]];
+    RNMyLib *lib = [RNMyLib sharedLib];
+    [lib.engine openCamera:cameraEnable];
+    [lib.engine publish];
+    [[RNMyLib sharedLib].engine setLocalPreview:lib.localPreview];
     
 }
 
@@ -212,6 +215,14 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager memberDidLeaveRoom:(NSDictionary *_Nonnull)memberInfo{
     // 发送事件
     [self sendEventWithName:@"event_memberDidLeaveRoom" body:memberInfo];
+}
+
+- (UIView*)localPreview {
+    if (!_localPreview) {
+        UIView *localPreview = [UIView new];
+        _localPreview = localPreview;
+    }
+    return _localPreview;
 }
 
 #pragma mark - 事件配置
