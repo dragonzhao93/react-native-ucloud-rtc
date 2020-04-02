@@ -58,13 +58,15 @@ RCT_EXPORT_MODULE()
 RCT_EXPORT_METHOD(initWithAppid:(NSString *)appid andAppkey:(NSString *)appkey andResolve:(RCTPromiseResolveBlock)resolve
 andReject:(RCTPromiseRejectBlock)reject){
     RNMyLib *sharedLib = [RNMyLib sharedLib];
-    sharedLib.engine = [[UCloudRtcEngine alloc]initWithAppID:appid appKey:appkey completionBlock:^(int errorCode) {
-        if (errorCode) {
-            reject(@(errorCode).stringValue,@"init fail", nil);
-        } else {
-            resolve(@"init success");
-        }
-    }];
+    if (nil==sharedLib.engine) {
+        sharedLib.engine = [[UCloudRtcEngine alloc]initWithAppID:appid appKey:appkey completionBlock:^(int errorCode) {
+            if (errorCode) {
+                reject(@(errorCode).stringValue,@"init fail", nil);
+            } else {
+                resolve(@"init success");
+            }
+        }];
+    }
     sharedLib.engine.delegate = sharedLib;
     sharedLib.engine.isAutoPublish = NO;
     
@@ -124,7 +126,7 @@ RCT_EXPORT_METHOD(unSubscribeRemoteStream){
 RCT_EXPORT_METHOD(subscribeLocalStreamWithCameraEnable:(BOOL)cameraEnable){
     [[RNMyLib sharedLib].engine openCamera:cameraEnable];
     [[RNMyLib sharedLib].engine publish];
-    [[RNMyLib sharedLib].engine setLocalPreview:[RNMyVideoView sharedView]];
+    //[[RNMyLib sharedLib].engine setLocalPreview:[RNMyVideoView sharedView]];
     
 }
 
