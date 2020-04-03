@@ -22,12 +22,11 @@
 @property (nonatomic, strong) UIView *localPreview;
 ///  是否开启本地摄像头
 @property (nonatomic, assign) BOOL cameraEnable;
+@property (nonatomic, assign) BOOL hasListeners;
 @end
 
 
-@implementation RNMyLib{
-    BOOL _hasListeners;
-}
+@implementation RNMyLib
 
 +(id)allocWithZone:(NSZone *)zone {
   static RNMyLib *sharedInstance = nil;
@@ -242,6 +241,7 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     NSLog(@"发布状态：%ld",(long)publishState);
     if (publishState == UCloudRtcEnginePublishStatePublishSucceed) {
         NSLog(@"设置是否禁用摄像头");
+        /*
         [[RNMyLib sharedLib].engine openCamera:self.cameraEnable];
         if ([[RNMyVideoView sharedView] subviews] != 0) {
             [[[RNMyVideoView sharedView] subviews]makeObjectsPerformSelector:@selector(removeFromSuperview)];
@@ -249,8 +249,10 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
         UIView *view = [[UIView alloc]init];
         view.frame = [RNMyVideoView sharedView].bounds;
         [[RNMyVideoView sharedView] addSubview:view];
-       //[stream renderOnView:view];
         [[RNMyLib sharedLib].engine setLocalPreview:view];
+         */
+        [[RNMyLib sharedLib].engine openCamera:self.cameraEnable];
+        [[RNMyLib sharedLib].engine setLocalPreview:[RNMyVideoView sharedView]];
     }
 }
 
