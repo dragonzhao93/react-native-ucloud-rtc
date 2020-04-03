@@ -243,7 +243,14 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     if (publishState == UCloudRtcEnginePublishStatePublishSucceed) {
         NSLog(@"设置是否禁用摄像头");
         [[RNMyLib sharedLib].engine openCamera:self.cameraEnable];
-        [[RNMyLib sharedLib].engine setLocalPreview:[RNMyVideoView sharedView]];
+        if ([[RNMyVideoView sharedView] subviews] != 0) {
+            [[[RNMyVideoView sharedView] subviews]makeObjectsPerformSelector:@selector(removeFromSuperview)];
+        }
+        UIView *view = [[UIView alloc]init];
+        view.frame = [RNMyVideoView sharedView].bounds;
+        [[RNMyVideoView sharedView] addSubview:view];
+       //[stream renderOnView:view];
+        [[RNMyLib sharedLib].engine setLocalPreview:view];
     }
 }
 
@@ -290,6 +297,7 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     [stream renderOnView:view];
     
 }
+
 
 #pragma mark - 异常提示
 + (void)showMessageWithCode:(NSInteger)code andMessage:(NSString *)message {
