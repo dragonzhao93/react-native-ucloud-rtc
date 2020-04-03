@@ -20,7 +20,8 @@
 @property (nonatomic, strong) UCloudRtcStream *targetStream;
 /// 展示预览图
 @property (nonatomic, strong) UIView *localPreview;
-
+///  是否开启本地摄像头
+@property (nonatomic, assign) BOOL cameraEnable;
 @end
 
 
@@ -56,6 +57,7 @@ RCT_EXPORT_MODULE()
  @brief 初始化UCloudRtcEngine
  @param appid 分配得到的应用ID
  @param appKey 分配得到的appkey
+ @param isDebug 是否打印日志开关  YES开  NO关
  */
 RCT_EXPORT_METHOD(initWithAppid:(NSString *)appid andAppkey:(NSString *)appkey andDebug:(BOOL)isDebug andResolve:(RCTPromiseResolveBlock)resolve
 andReject:(RCTPromiseRejectBlock)reject){
@@ -136,11 +138,8 @@ RCT_EXPORT_METHOD(unSubscribeRemoteStream){
  @param cameraEnable设置本地流是否启用相机(YES为音视频  NO是纯音频)
 */
 RCT_EXPORT_METHOD(subscribeLocalStreamWithCameraEnable:(BOOL)cameraEnable){
-    RNMyLib *lib = [RNMyLib sharedLib];
-    [lib.engine openCamera:cameraEnable];
-    [lib.engine publish];
-    [[RNMyLib sharedLib].engine setLocalPreview:lib.localPreview];
-    
+    [RNMyLib sharedLib].cameraEnable = cameraEnable;
+    [[RNMyLib sharedLib].engine publish];
 }
 
 /**
@@ -185,32 +184,33 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     }
 }
 
-/**
- @brief 监听远端流音频音量变化，范围是(0-100)
- @discussion 该值只是反映音量变化的一个指标
- @param volume 音量值
- @param uId  userid
- */
-- (void)remoteAudioVolumeChange:(int)volume userID:(NSString *_Nonnull)uId {
-    // 发送事件
-    [self sendEventWithName:@"event_remoteVolumeChange" body:@{@"volume":@(volume),@"userid":uId}];
-}
-
 /**非自动订阅模式下 可订阅流加入*/
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)channel newStreamHasJoinRoom:(UCloudRtcStream *_Nonnull)stream {
     // 渲染到指定视图
     [stream renderOnView:[RNMyVideoView sharedView]];
 }
 
-/**流 状态回调*/
-- (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager didReceiveStreamStatus:(NSArray<UCloudRtcStreamStatsInfo*> *_Nonnull)status{
+ /**流 状态回调*/
+- (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager didReceiveStreamStatus:(NSArray<UCloudRtcStreamStatsInfo*> *_Nonnull)status {
     for (int i = 0 ; i < status.count; i ++) {
         UCloudRtcStreamStatsInfo *info = status[i];
         if ([info isKindOfClass:[UCloudRtcStreamStatsInfo class]]) {
-            NSLog(@"streamInfo:  streamId = %@   userId = %@",info.streamId,info.userId);
+            NSString *userid = info.userId;
+            NSString *volume = [NSString stringWithFormat:@"%ld",(long)info.volume];
+            if ([userid isKindOfClass:[NSString class]]) {
+                [self libSendEventWithName:@"event_remoteVolumeChange" andParams:@{@"volume":volume,@"userid":info.userId}];
+            }
+            
         } else {
            NSLog(@"streamInfo: %@",info);
         }
+    }
+}
+ 
+ // 发送事件
+- (void)libSendEventWithName:(NSString *)name andParams:(NSDictionary *)params {
+    if (self.hasListeners) {
+        [self sendEventWithName:name body:params];
     }
 }
 
@@ -235,6 +235,16 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
 - (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager memberDidLeaveRoom:(NSDictionary *_Nonnull)memberInfo{
     // 发送事件
     [self sendEventWithName:@"event_memberDidLeaveRoom" body:memberInfo];
+}
+
+/**发布状态的变化*/
+- (void)uCloudRtcEngine:(UCloudRtcEngine *_Nonnull)manager didChangePublishState:(UCloudRtcEnginePublishState)publishState {
+    NSLog(@"发布状态：%ld",(long)publishState);
+    if (publishState == UCloudRtcEnginePublishStatePublishSucceed) {
+        NSLog(@"设置是否禁用摄像头");
+        [[RNMyLib sharedLib].engine openCamera:self.cameraEnable];
+        [[RNMyLib sharedLib].engine setLocalPreview:[RNMyVideoView sharedView]];
+    }
 }
 
 #pragma mark - 懒加载view
