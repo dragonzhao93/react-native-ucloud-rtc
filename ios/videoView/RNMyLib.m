@@ -255,9 +255,7 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
  
  /**发送事件*/
 - (void)libSendEventWithName:(NSString *)name andParams:(NSDictionary *)params {
-    if (self.hasListeners) {
-        [self sendEventWithName:name body:params];
-    }
+    [self sendEventWithName:name body:params];
 }
 
 /**流 连接失败*/
