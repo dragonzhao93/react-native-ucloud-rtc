@@ -107,7 +107,7 @@ public class RNMyLibraryModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public String initWithAppid(String appid, String appkey, Promise promise){
+    public String initWithAppid(String appid, String appkey, boolean isDebug, Promise promise){
         this.mAppId = appid;
         sdkEngine.setAudioOnlyMode(false) ; // 设置纯音频模式
         sdkEngine.configLocalCameraPublish(true) ; // 设置摄像头是否发布
@@ -126,32 +126,32 @@ public class RNMyLibraryModule extends ReactContextBaseJavaModule {
 
     private Promise roomPromise;
     @ReactMethod
-    public void joinRoomWithRoomid(String roomId,String userId,String token,boolean isAudio,Promise promise){
+    public void joinRoomWithRoomid(String roomId,String userId,String token, Promise promise){
         this.roomId = roomId;
         this.userId = userId;
         this.mToken = token;
 
-        this.mAppId = "urtc-ipdozn3z";
-        this.roomId = "ssss07";
-        this.mToken = "eyJ1c2VyX2lkIjoiNDA1ODA4Iiwicm9vbV9pZCI6InNzc3MwMiIsImFwcF9pZCI6InVydGMtaXBkb3puM3oifQ==.d68c9a9d409e31d8efb7f28ee012d465f9d19042158512816546076944";
+//        this.mAppId = "urtc-ipdozn3z";
+//        this.roomId = "ssss07";
+//        this.mToken = "eyJ1c2VyX2lkIjoiNDA1ODA4Iiwicm9vbV9pZCI6InNzc3MwMiIsImFwcF9pZCI6InVydGMtaXBkb3puM3oifQ==.d68c9a9d409e31d8efb7f28ee012d465f9d19042158512816546076944";
 
 
         this.roomPromise = promise;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                //开始申请采集桌面显示的所有内容，在onActivityResult中得到回调
-                Activity activity = mContext.getCurrentActivity();
-                SuperLog.e(TAG,"NAME = " + activity.getLocalClassName());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            //开始申请采集桌面显示的所有内容，在onActivityResult中得到回调
+            Activity activity = mContext.getCurrentActivity();
+            SuperLog.e(TAG,"NAME = " + activity.getLocalClassName());
 
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        UCloudRtcSdkEngine.requestScreenCapture(mContext.getCurrentActivity());
-                    }
-                });
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    UCloudRtcSdkEngine.requestScreenCapture(mContext.getCurrentActivity());
+                }
+            });
 
-            }else{
-                startJoinChannel();
-            }
+        }else{
+            startJoinChannel();
+        }
 
 
 
@@ -204,8 +204,8 @@ public class RNMyLibraryModule extends ReactContextBaseJavaModule {
             intent.putExtra("token",mToken);
             mContext.getCurrentActivity().startActivity(intent);
         }else{
-        UCloudRtcSdkErrorCode code = sdkEngine.joinChannel(info);
-        SuperLog.e(TAG,"CODE = " + sdkEngine.joinChannel(info).getErrorCode());
+            UCloudRtcSdkErrorCode code = sdkEngine.joinChannel(info);
+            SuperLog.e(TAG,"CODE = " + sdkEngine.joinChannel(info).getErrorCode());
         }
     }
 
@@ -241,16 +241,30 @@ public class RNMyLibraryModule extends ReactContextBaseJavaModule {
         //发布本地流
         ToastUtils.shortShow(mContext,"subscribeLocalStream");
         sdkEngine.publish(UCloudRtcSdkMediaType.UCLOUD_RTC_SDK_MEDIA_TYPE_VIDEO, true,true);
-
-
     }
     @ReactMethod
     public void unSubscribeLocalStream(){
         //取消发布本地流
         SuperLog.e("RNMyLibraryModule","this is unSubscribeLocalStream");
         sdkEngine.unPublish(UCloudRtcSdkMediaType.UCLOUD_RTC_SDK_MEDIA_TYPE_VIDEO);
+    }
+
+
+    @ReactMethod
+    public void publishLocalStreamWithCameraEnable(boolean isOpenCamear){
+        //发布本地流
+        ToastUtils.shortShow(mContext,"publishLocalStreamWithCameraEnable");
+        sdkEngine.publish(UCloudRtcSdkMediaType.UCLOUD_RTC_SDK_MEDIA_TYPE_VIDEO, true,true);
+    }
+    @ReactMethod
+    public void unPublishLocalStream(){
+        //取消发布本地流
+        SuperLog.e("RNMyLibraryModule","this is unPublishLocalStream");
+        sdkEngine.unPublish(UCloudRtcSdkMediaType.UCLOUD_RTC_SDK_MEDIA_TYPE_VIDEO);
 
     }
+
+
     @ReactMethod
     public void startRecordLocalStreamWithType(int type){
         //录制本地视频

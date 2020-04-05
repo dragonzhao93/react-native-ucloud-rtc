@@ -41,7 +41,8 @@ repositories {
 
 dependencies {
     implementation 'com.facebook.react:react-native:+'
-    implementation fileTree(dir: "libs", include: ["*.aar"])
+    implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation (name: 'ucloudrtclib_1.6.2_3bf8317c', ext: 'aar')
+//    implementation (name: 'ucloudrtclib_1.7.3_aabbfc24_w', ext: 'aar')
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
 }

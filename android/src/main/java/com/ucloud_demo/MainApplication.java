@@ -39,9 +39,8 @@ public class MainApplication extends Application implements ReactApplication {
 //            packages.add(new MainReactPackage());
 //            packages.add(new RNMyLibraryPackage());
             return Arrays.<ReactPackage>asList(
-                    new MainReactPackage(),
-                    new RNMyLibraryPackage(),
-                    new UcloudVideoViewPackage()
+//                    new MainReactPackage(),
+//                    new RNMyLibraryPackage()
             );
 //            return Arrays.<ReactPackage>asList(
 //            new UcloudPackage()
