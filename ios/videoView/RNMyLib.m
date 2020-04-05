@@ -22,7 +22,8 @@
 @property (nonatomic, strong) UIView *localPreview;
 ///  是否开启本地摄像头
 @property (nonatomic, assign) BOOL cameraEnable;
-@property (nonatomic, assign) BOOL hasListeners;
+
+@property (nonatomic, strong) NSString *appid,*appkey,*roomid,*userid,*token;
 @end
 
 
@@ -60,7 +61,13 @@ RCT_EXPORT_MODULE()
  */
 RCT_EXPORT_METHOD(initWithAppid:(NSString *)appid andAppkey:(NSString *)appkey andDebug:(BOOL)isDebug andResolve:(RCTPromiseResolveBlock)resolve
 andReject:(RCTPromiseRejectBlock)reject){
+    self.appid = appid;
+    self.appkey = appkey;
+    NSLog(@"sdk版本号：%@",[UCloudRtcEngine currentVersion]);
     RNMyLib *sharedLib = [RNMyLib sharedLib];
+    if (sharedLib.engine) {
+        sharedLib.engine = nil;
+    }
     if (nil==sharedLib.engine) {
         sharedLib.engine = [[UCloudRtcEngine alloc]initWithAppID:appid appKey:appkey completionBlock:^(int errorCode) {
             if (errorCode && reject) {
@@ -73,8 +80,12 @@ andReject:(RCTPromiseRejectBlock)reject){
             }
         }];
     }
+    sharedLib.engine.streamProfile = UCloudRtcEngine_StreamProfileDownload;
+    sharedLib.engine.isOnlyAudio = NO;
     sharedLib.engine.delegate = sharedLib;
     sharedLib.engine.isAutoPublish = NO;
+    sharedLib.engine.isAutoSubscribe = YES;
+    [[RNMyLib sharedLib].engine setLocalPreview:self.localPreview];
     //打印日志开关
     UCloudRtcLog *logger = [UCloudRtcLog new];
     LogLevel logLevel = isDebug?UCloudRtcLogLevel_DEBUG:UCloudRtcLogLevel_OFF;
@@ -90,6 +101,9 @@ andReject:(RCTPromiseRejectBlock)reject){
 */
 RCT_EXPORT_METHOD(joinRoomWithRoomid:(NSString *)roomid andUserid:(NSString *)userid andToken:(NSString *)token andResolve:(RCTPromiseResolveBlock)resolve
 andReject:(RCTPromiseRejectBlock)reject){
+    self.roomid = roomid;
+    self.userid = userid;
+    self.token = token;
     //设置本地预览模式：等比缩放填充整View，可能有部分被裁减
     [[RNMyLib sharedLib].engine setPreviewMode:UCloudRtcVideoViewModeScaleAspectFill];
     //设置远端预览模式：等比缩放填充整View，可能有部分被裁减
@@ -136,9 +150,42 @@ RCT_EXPORT_METHOD(unSubscribeRemoteStream){
  @brief 发布本地流
  @param cameraEnable设置本地流是否启用相机(YES为音视频  NO是纯音频)
 */
-RCT_EXPORT_METHOD(subscribeLocalStreamWithCameraEnable:(BOOL)cameraEnable){
+RCT_EXPORT_METHOD(publishLocalStreamWithCameraEnable:(BOOL)cameraEnable){
     [RNMyLib sharedLib].cameraEnable = cameraEnable;
-    [[RNMyLib sharedLib].engine publish];
+    [[RNMyLib sharedLib].engine leaveRoom];
+    RNMyLib *sharedLib = [RNMyLib sharedLib];
+    if (sharedLib.engine) {
+        sharedLib.engine = nil;
+    }
+    if (nil==sharedLib.engine) {
+        sharedLib.engine = [[UCloudRtcEngine alloc]initWithAppID:self.appid appKey:self.appkey completionBlock:^(int errorCode) {
+            if (errorCode) {
+                NSLog(@"init fail");
+            }else{
+                NSLog(@"init success");
+            }
+        }];
+    }
+    sharedLib.engine.streamProfile = UCloudRtcEngine_StreamProfileAll;
+    sharedLib.engine.isOnlyAudio = NO;
+    sharedLib.engine.delegate = sharedLib;
+    sharedLib.engine.isAutoPublish = YES;
+    sharedLib.engine.isAutoSubscribe = YES;
+    
+    //设置本地预览模式：等比缩放填充整View，可能有部分被裁减
+    [sharedLib.engine setPreviewMode:UCloudRtcVideoViewModeScaleAspectFill];
+    //设置远端预览模式：等比缩放填充整View，可能有部分被裁减
+    [sharedLib.engine setRemoteViewMode:UCloudRtcVideoViewModeScaleAspectFill];
+    [sharedLib.engine setLocalPreview:self.localPreview];
+    [sharedLib.engine joinRoomWithRoomId:self.roomid userId:self.userid token:self.token completionHandler:^(NSDictionary * _Nonnull response, int errorCode) {
+        NSLog(@"response:%@",response);
+        NSLog(@"errorCode:%d",errorCode);
+        if (errorCode){
+           NSLog(@"join fail");
+        }else{ //加入房间成功
+            NSLog(@"join success");
+        }
+    }];
 }
 
 /**
@@ -206,7 +253,7 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     }
 }
  
- // 发送事件
+ /**发送事件*/
 - (void)libSendEventWithName:(NSString *)name andParams:(NSDictionary *)params {
     if (self.hasListeners) {
         [self sendEventWithName:name body:params];
@@ -241,18 +288,7 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     NSLog(@"发布状态：%ld",(long)publishState);
     if (publishState == UCloudRtcEnginePublishStatePublishSucceed) {
         NSLog(@"设置是否禁用摄像头");
-        /*
         [[RNMyLib sharedLib].engine openCamera:self.cameraEnable];
-        if ([[RNMyVideoView sharedView] subviews] != 0) {
-            [[[RNMyVideoView sharedView] subviews]makeObjectsPerformSelector:@selector(removeFromSuperview)];
-        }
-        UIView *view = [[UIView alloc]init];
-        view.frame = [RNMyVideoView sharedView].bounds;
-        [[RNMyVideoView sharedView] addSubview:view];
-        [[RNMyLib sharedLib].engine setLocalPreview:view];
-         */
-        [[RNMyLib sharedLib].engine openCamera:self.cameraEnable];
-        [[RNMyLib sharedLib].engine setLocalPreview:[RNMyVideoView sharedView]];
     }
 }
 
@@ -275,14 +311,6 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     ];
 }
 
-- (void)startObserving {
-  _hasListeners = YES;
-}
-
-- (void)stopObserving {
-  _hasListeners = NO;
-}
-
 /**渲染视图
  *[RNMyVideoView sharedView]  父视图，
  *view 子视图
@@ -299,7 +327,6 @@ RCT_EXPORT_METHOD(stopRecordLocalStream) {
     [stream renderOnView:view];
     
 }
-
 
 #pragma mark - 异常提示
 + (void)showMessageWithCode:(NSInteger)code andMessage:(NSString *)message {
