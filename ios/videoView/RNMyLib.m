@@ -191,7 +191,7 @@ RCT_EXPORT_METHOD(publishLocalStreamWithCameraEnable:(BOOL)cameraEnable){
 /**
  @brief 取消发布本地流
 */
-RCT_EXPORT_METHOD(unSubscribeLocalStream) {
+RCT_EXPORT_METHOD(unPublishLocalStream) {
     [[RNMyLib sharedLib].engine unPublish];
 }
 
