@@ -70,11 +70,11 @@ UCloudRtc.leaveRoom();
 #### 发布本地流
  ```
  flag: 是否开启摄像头 true-推送音视频流 false-仅推送音频
- UCloudRtc.subscribeLocalStreamWithCameraEnable(flag)
+ UCloudRtc.publishLocalStreamWithCameraEnable(flag)
  ```
 #### 取消发布本地流
  ```
- UCloudRtc.unSubscribeLocalStream()
+ UCloudRtc.unPublishLocalStream()
  ```
 #### 录制音视频
  ```
