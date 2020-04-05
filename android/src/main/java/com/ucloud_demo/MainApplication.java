@@ -2,15 +2,24 @@ package com.ucloud_demo;
 
 import android.app.Application;
 import android.content.Context;
-//import com.facebook.react.PackageList;
+import android.util.DisplayMetrics;
+import android.view.WindowManager;
+
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
+import com.ucloud_demo.utils.CommonUtils;
+import com.ucloudrtclib.sdkengine.UCloudRtcSdkEnv;
+import com.ucloudrtclib.sdkengine.define.UCloudRtcSdkLogLevel;
+import com.ucloudrtclib.sdkengine.define.UCloudRtcSdkMode;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
+
+//import com.facebook.react.PackageList;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -31,7 +40,8 @@ public class MainApplication extends Application implements ReactApplication {
 //            packages.add(new RNMyLibraryPackage());
             return Arrays.<ReactPackage>asList(
                     new MainReactPackage(),
-                    new RNMyLibraryPackage()
+                    new RNMyLibraryPackage(),
+                    new UcloudVideoViewPackage()
             );
 //            return Arrays.<ReactPackage>asList(
 //            new UcloudPackage()
@@ -54,8 +64,29 @@ public class MainApplication extends Application implements ReactApplication {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
     initializeFlipper(this); // Remove this line if you don't want Flipper enabled
+      initUCloudSDK();
   }
 
+
+  private void initUCloudSDK(){
+      UCloudRtcSdkEnv.initEnv(getApplicationContext(), this);
+      UCloudRtcSdkEnv.setWriteToLogCat(true);
+      UCloudRtcSdkEnv.setLogLevel(UCloudRtcSdkLogLevel.UCLOUD_RTC_SDK_LogLevelInfo);
+      UCloudRtcSdkEnv.setSdkMode(UCloudRtcSdkMode.UCLOUD_RTC_SDK_MODE_TRIVAL);
+      UCloudRtcSdkEnv.setTokenSeckey(CommonUtils.SEC_KEY);
+      //私有化部署
+//        UCloudRtcSdkEnv.setPrivateDeploy(true);
+//        UCloudRtcSdkEnv.setPrivateDeployRoomURL("wss://192.168.20.90:5228/ws");
+      //无限重连
+//        UCloudRtcSdkEnv.setReConnectTimes(-1);
+      //默认vp8编码，可以改成h264
+//        UCloudRtcSdkEnv.setEncodeMode(UcloudRtcSdkPushEncode.UCLOUD_RTC_PUSH_ENCODE_MODE_H264);
+      WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+      DisplayMetrics outMetrics = new DisplayMetrics();
+      windowManager.getDefaultDisplay().getMetrics(outMetrics);
+      CommonUtils.mItemWidth = (outMetrics.widthPixels - UiHelper.dipToPx(this, 15)) / 3;
+      CommonUtils.mItemHeight = CommonUtils.mItemWidth;
+  }
   /**
    * Loads Flipper in React Native templates.
    *
