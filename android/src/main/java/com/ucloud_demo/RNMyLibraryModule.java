@@ -48,13 +48,13 @@ import com.ucloudrtclib.sdkengine.define.UCloudRtcSdkTrackType;
 import com.ucloudrtclib.sdkengine.define.UCloudRtcSdkVideoProfile;
 import com.ucloudrtclib.sdkengine.listener.UCloudRtcSdkEventListener;
 
-import org.w3c.dom.DOMConfiguration;
 
 import static android.app.Activity.RESULT_OK;
 
 public class RNMyLibraryModule extends ReactContextBaseJavaModule {
     private ReactApplicationContext mContext;
     private final String TAG = this.getClass().getSimpleName();
+    private boolean isNeesScreenCapture = false;
     private String roomId;
     private String userId;
     private String mToken;
@@ -72,6 +72,7 @@ public class RNMyLibraryModule extends ReactContextBaseJavaModule {
         mActivity = getCurrentActivity();
         mContext.addActivityEventListener(mActivityEvent);
         mHandler = new Handler(Looper.getMainLooper());
+        initUCloud();
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -91,22 +92,25 @@ public class RNMyLibraryModule extends ReactContextBaseJavaModule {
         return "RNMyLib";
     }
 
-//    @ReactMethod
-//    public void initSDKWithUserIDappID(String appid,String appkey){
-//        this.mAppId = appid;
-//
-//        sdkEngine.setAudioOnlyMode(false) ; // 设置纯音频模式
-//        sdkEngine.configLocalCameraPublish(true) ; // 设置摄像头是否发布
-//        sdkEngine.configLocalAudioPublish(true) ; // 设置音频是否发布，用于让sdk判断自动发布的媒体类型
-//        sdkEngine.configLocalScreenPublish(true) ; // 设置桌面是否发布，作用同上
-//        sdkEngine.setStreamRole(UCloudRtcSdkStreamRole.UCLOUD_RTC_SDK_STREAM_ROLE_BOTH);// 流权限
-//        sdkEngine.setAutoPublish(false) ; // 是否自动发布
-//        sdkEngine.setAutoSubscribe(true) ;// 是否自动订阅
-//        // 摄像头输出等级
-//        sdkEngine.setVideoProfile(UCloudRtcSdkVideoProfile.matchValue(0)) ;
-//        String verCode = UCloudRtcSdkEngine.getSdkVersion();
-//        SuperLog.e("RNMyLibraryModule","this is initSDKWithUserIDappID and SDK Ver = " + verCode);
-//    }
+    /**
+     * 初始化SDK
+     * @params
+     * @params
+     */
+    private void initUCloud(){
+        UCloudRtcSdkEnv.initEnv(mContext.getApplicationContext());
+        UCloudRtcSdkEnv.setWriteToLogCat(true);
+        UCloudRtcSdkEnv.setLogLevel(UCloudRtcSdkLogLevel.UCLOUD_RTC_SDK_LogLevelInfo);
+        UCloudRtcSdkEnv.setSdkMode(UCloudRtcSdkMode.UCLOUD_RTC_SDK_MODE_TRIVAL);
+        UCloudRtcSdkEnv.setTokenSeckey(CommonUtils.SEC_KEY);
+        WindowManager windowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(outMetrics);
+        CommonUtils.mItemWidth = (outMetrics.widthPixels - UiHelper.dipToPx(mContext, 15)) / 3;
+        CommonUtils.mItemHeight = CommonUtils.mItemWidth;
+    }
+
+
     @ReactMethod
     public void initWithAppid(String appid, String appkey, boolean isAuto, Promise promise){
         this.mAppId = appid;
@@ -131,21 +135,18 @@ public class RNMyLibraryModule extends ReactContextBaseJavaModule {
         this.userId = userId;
         this.mToken = token;
         this.roomPromise = promise;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                //开始申请采集桌面显示的所有内容，在onActivityResult中得到回调
-                Activity activity = mContext.getCurrentActivity();
-                SuperLog.e(TAG,"NAME = " + activity.getLocalClassName());
-
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        UCloudRtcSdkEngine.requestScreenCapture(mContext.getCurrentActivity());
-                    }
-                });
-
-            }else{
-                startJoinChannel();
-            }
+        startJoinChannel();
+        if (isNeesScreenCapture && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            //开始申请采集桌面显示的所有内容，在onActivityResult中得到回调
+            Activity activity = mContext.getCurrentActivity();
+            SuperLog.e(TAG,"NAME = " + activity.getLocalClassName());
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    UCloudRtcSdkEngine.requestScreenCapture(mContext.getCurrentActivity());
+                }
+            });
+        }
 
 
 
@@ -200,9 +201,6 @@ public class RNMyLibraryModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void subscribeRemoteStream(){
-//        this.userId = "958878";
-
-        Toast.makeText(mContext, "subscribeRemoteStream", Toast.LENGTH_SHORT).show();
         //订阅远程流
         SuperLog.e("RNMyLibraryModule","this is subscribeRemoteStream");
         UCloudRtcSdkStreamInfo info = new UCloudRtcSdkStreamInfo();
@@ -224,20 +222,6 @@ public class RNMyLibraryModule extends ReactContextBaseJavaModule {
         sdkEngine.subscribe(info);
 
     }
-//    @ReactMethod
-//    public void subscribeLocalStream(){
-//        //发布本地流
-//        ToastUtils.shortShow(mContext,"subscribeLocalStream");
-//        sdkEngine.publish(UCloudRtcSdkMediaType.UCLOUD_RTC_SDK_MEDIA_TYPE_VIDEO, true,true);
-//    }
-//    @ReactMethod
-//    public void unSubscribeLocalStream(){
-//        //取消发布本地流
-//        SuperLog.e("RNMyLibraryModule","this is unSubscribeLocalStream");
-//        sdkEngine.unPublish(UCloudRtcSdkMediaType.UCLOUD_RTC_SDK_MEDIA_TYPE_VIDEO);
-//    }
-
-
     @ReactMethod
     public void publishLocalStreamWithCameraEnable(boolean isOpenCamera){
         if(!PermissionUtils.hasPermissions(mContext,Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE)){
@@ -347,7 +331,7 @@ public class RNMyLibraryModule extends ReactContextBaseJavaModule {
                     info.setHasAudio(true);
                     info.setHasData(true);
                     rnMyVideoView.getVideoView().getSurfaceView().setNeedFullScreen(true);
-                    sdkEngine.startPreview(info.getMediaType(), rnMyVideoView.getVideoView());
+                    sdkEngine.startPreview(info.getMediaType(), rnMyVideoView.getVideoView(),UCloudRtcSdkScaleType.UCLOUD_RTC_SDK_SCALE_ASPECT_FIT,null);
                 }
             });
         }
@@ -418,7 +402,8 @@ public class RNMyLibraryModule extends ReactContextBaseJavaModule {
                     rnMyVideoView.setBackgroundColor(Color.TRANSPARENT);
                     //进行媒体流渲染
                     rnMyVideoView.getVideoView().getSurfaceView().setNeedFullScreen(false);
-                    sdkEngine. startRemoteView(info, rnMyVideoView.getVideoView());
+                    sdkEngine.startRemoteView(info, rnMyVideoView.getVideoView(),UCloudRtcSdkScaleType.UCLOUD_RTC_SDK_SCALE_ASPECT_FIT,null);
+
                 }
             });
 
@@ -491,6 +476,26 @@ public class RNMyLibraryModule extends ReactContextBaseJavaModule {
         }
 
         @Override
+        public void onMixStart(int i, String s) {
+
+        }
+
+        @Override
+        public void onMixStop(int i, String s) {
+
+        }
+
+        @Override
+        public void onAddStreams(int i, String s) {
+
+        }
+
+        @Override
+        public void onDelStreams(int i, String s) {
+
+        }
+
+        @Override
         public void onMsgNotify(int i, String s) {
 
         }
@@ -502,6 +507,11 @@ public class RNMyLibraryModule extends ReactContextBaseJavaModule {
 
         @Override
         public void onAudioDeviceChanged(UCloudRtcSdkAudioDevice uCloudRtcSdkAudioDevice) {
+
+        }
+
+        @Override
+        public void onPeerLostConnection(int i, UCloudRtcSdkStreamInfo uCloudRtcSdkStreamInfo) {
 
         }
     };

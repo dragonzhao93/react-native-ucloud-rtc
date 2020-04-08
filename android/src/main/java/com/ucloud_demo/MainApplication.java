@@ -63,21 +63,6 @@ public class MainApplication extends Application implements ReactApplication {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
     initializeFlipper(this); // Remove this line if you don't want Flipper enabled
-      initUCloudSDK();
-  }
-
-
-  private void initUCloudSDK(){
-      UCloudRtcSdkEnv.initEnv(getApplicationContext(), this);
-      UCloudRtcSdkEnv.setWriteToLogCat(true);
-      UCloudRtcSdkEnv.setLogLevel(UCloudRtcSdkLogLevel.UCLOUD_RTC_SDK_LogLevelInfo);
-      UCloudRtcSdkEnv.setSdkMode(UCloudRtcSdkMode.UCLOUD_RTC_SDK_MODE_TRIVAL);
-      UCloudRtcSdkEnv.setTokenSeckey(CommonUtils.SEC_KEY);
-      WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-      DisplayMetrics outMetrics = new DisplayMetrics();
-      windowManager.getDefaultDisplay().getMetrics(outMetrics);
-      CommonUtils.mItemWidth = (outMetrics.widthPixels - UiHelper.dipToPx(this, 15)) / 3;
-      CommonUtils.mItemHeight = CommonUtils.mItemWidth;
   }
   /**
    * Loads Flipper in React Native templates.
