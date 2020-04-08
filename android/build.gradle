@@ -42,6 +42,9 @@ repositories {
 dependencies {
     implementation 'com.facebook.react:react-native:+'
     implementation fileTree(dir: "libs", include: ["*.jar"])
+    //改成1.1.0会报错，提示MainReactPackage：185行，SwipeRefreshLayoutManager找不到
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.annotation:annotation:1.0.2'
     implementation (name: 'ucloudrtclib_1.6.2_3bf8317c', ext: 'aar')
 //    implementation (name: 'ucloudrtclib_1.7.3_aabbfc24_w', ext: 'aar')
     implementation 'androidx.recyclerview:recyclerview:1.1.0'

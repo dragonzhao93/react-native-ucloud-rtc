@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
@@ -44,7 +45,7 @@ class RNMyVideoView extends LinearLayout {
         mLocalView.setScalingType(UCloudRtcSdkScaleType.UCLOUD_RTC_SDK_SCALE_ASPECT_FIT);
         mLocalView.setId(R.id.video_view);
 
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT,UiHelper.dipToPx(mContext,200));
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT,UiHelper.dipToPx(mContext, ViewGroup.LayoutParams.MATCH_PARENT));
 
         mLocalView.setLayoutParams(params);
         this.addView(mLocalView);
