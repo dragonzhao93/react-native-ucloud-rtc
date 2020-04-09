@@ -41,7 +41,9 @@ UCloudRtc.initWithAppid(appid, appKey);
 appid: appid,
 appKey: appKey,
 isDebug: 是否开启日志, true-开启、false-关闭
-UCloudRtc.initWithAppid(appid, appKey, isDebug).then(res => {
+roomType: 0小班课、视频会议、默认值  1大班课    
+streamProfile: 权限  0上传权限  1下载权限  2所有权限 默认值
+UCloudRtc.initWithAppid(appid, appKey, isDebug, roomType, streamProfile).then(res => {
     console.log('收到回调', res);
   }).catch(err => {
     console.log('捕获异常', err);
