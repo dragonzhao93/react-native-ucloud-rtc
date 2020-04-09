@@ -30,18 +30,19 @@ android {
 }
 
 repositories {
-//    mavenCentral()
-//    maven {
-//        url "$rootDir/../node_modules/react-native-ucloud-rtc/android"
-//    }
     flatDir {
         dirs 'libs'
     }
 }
 
 dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    //改成1.1.0会报错，提示MainReactPackage：185行，SwipeRefreshLayoutManager找不到
+//    implementation (name: 'ucloudrtclib_1.6.2_3bf8317c', ext: 'aar')
     implementation 'com.facebook.react:react-native:+'
-    implementation fileTree(dir: "libs", include: ["*.aar"])
-    implementation (name: 'ucloudrtclib_1.6.2_3bf8317c', ext: 'aar')
+    implementation (name: 'ucloudrtclib_1.7.3_aabbfc24_w', ext: 'aar')
+//    implementation (name: 'ucloudrtclib_1.7.3_20120511_w', ext: 'aar')
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.annotation:annotation:1.0.2'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
 }

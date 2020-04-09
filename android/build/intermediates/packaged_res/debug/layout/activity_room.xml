@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    tools:ignore="MergeRootFrame">
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <com.ucloudrtclib.sdkengine.define.UCloudRtcSdkSurfaceVideoView
+                android:id="@+id/localview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <ProgressBar
+                android:id="@+id/processlocal"
+                style="@android:style/Widget.ProgressBar.Horizontal"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="5dp"
+                android:layout_width="5dp"
+                android:layout_height="match_parent"
+                android:max="100"
+                android:progress="0" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:visibility="visible"
+                android:layout_alignWithParentIfMissing="true"
+                android:layout_marginTop="5dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+
+                <ImageButton
+                    android:id="@+id/button_call_disconnect"
+                    android:layout_marginEnd="8dp"
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"/>
+
+                <ImageButton
+                    android:id="@+id/button_call_toggle_cam"
+                    android:layout_marginEnd="8dp"
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"/>
+
+                <ImageButton
+                    android:id="@+id/button_call_switch_camera"
+                    android:layout_marginEnd="8dp"
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"/>
+
+                <ImageButton
+                    android:id="@+id/button_call_toggle_mic"
+                    android:layout_marginEnd="8dp"
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"/>
+
+                <ImageButton
+                    android:id="@+id/button_call_loundspeaker"
+                    android:contentDescription="loud speaker on/off"
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"/>
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
+
+</RelativeLayout>
