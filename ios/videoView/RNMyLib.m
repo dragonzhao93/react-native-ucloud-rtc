@@ -54,12 +54,14 @@
 RCT_EXPORT_MODULE()
 
 /**
- @brief 初始化UCloudRtcEngine
- @param appid 分配得到的应用ID
- @param appKey 分配得到的appkey
- @param isDebug 是否打印日志开关  YES开  NO关
- */
-RCT_EXPORT_METHOD(initWithAppid:(NSString *)appid andAppkey:(NSString *)appkey andDebug:(BOOL)isDebug andResolve:(RCTPromiseResolveBlock)resolve
+@brief 初始化UCloudRtcEngine
+@param appid 分配得到的应用ID
+@param appKey 分配得到的appkey
+@param isDebug 是否打印日志开关  YES开  NO关
+@param roomType 房间类型  0小班课、视频会议、默认值  1大班课
+@param streamProfile 权限  0上传权限  1下载权限  2所有权限 默认值
+*/
+RCT_EXPORT_METHOD(initWithAppid:(NSString *)appid andAppkey:(NSString *)appkey andDebug:(BOOL)isDebug andRoomType:(NSInteger)roomType andStreamProfile:(NSInteger)streamProfile andResolve:(RCTPromiseResolveBlock)resolve
 andReject:(RCTPromiseRejectBlock)reject){
     self.appid = appid;
     self.appkey = appkey;
@@ -80,12 +82,11 @@ andReject:(RCTPromiseRejectBlock)reject){
             }
         }];
     }
-    sharedLib.engine.streamProfile = UCloudRtcEngine_StreamProfileDownload;
-    sharedLib.engine.isOnlyAudio = NO;
+    sharedLib.engine.streamProfile = streamProfile;
+    sharedLib.engine.roomType = roomType;
     sharedLib.engine.delegate = sharedLib;
     sharedLib.engine.isAutoPublish = NO;
     sharedLib.engine.isAutoSubscribe = YES;
-    [[RNMyLib sharedLib].engine setLocalPreview:self.localPreview];
     //打印日志开关
     UCloudRtcLog *logger = [UCloudRtcLog new];
     LogLevel logLevel = isDebug?UCloudRtcLogLevel_DEBUG:UCloudRtcLogLevel_OFF;
@@ -152,40 +153,8 @@ RCT_EXPORT_METHOD(unSubscribeRemoteStream){
 */
 RCT_EXPORT_METHOD(publishLocalStreamWithCameraEnable:(BOOL)cameraEnable){
     [RNMyLib sharedLib].cameraEnable = cameraEnable;
-    [[RNMyLib sharedLib].engine leaveRoom];
-    RNMyLib *sharedLib = [RNMyLib sharedLib];
-    if (sharedLib.engine) {
-        sharedLib.engine = nil;
-    }
-    if (nil==sharedLib.engine) {
-        sharedLib.engine = [[UCloudRtcEngine alloc]initWithAppID:self.appid appKey:self.appkey completionBlock:^(int errorCode) {
-            if (errorCode) {
-                NSLog(@"init fail");
-            }else{
-                NSLog(@"init success");
-            }
-        }];
-    }
-    sharedLib.engine.streamProfile = UCloudRtcEngine_StreamProfileAll;
-    sharedLib.engine.isOnlyAudio = NO;
-    sharedLib.engine.delegate = sharedLib;
-    sharedLib.engine.isAutoPublish = YES;
-    sharedLib.engine.isAutoSubscribe = YES;
-    
-    //设置本地预览模式：等比缩放填充整View，可能有部分被裁减
-    [sharedLib.engine setPreviewMode:UCloudRtcVideoViewModeScaleAspectFill];
-    //设置远端预览模式：等比缩放填充整View，可能有部分被裁减
-    [sharedLib.engine setRemoteViewMode:UCloudRtcVideoViewModeScaleAspectFill];
-    [sharedLib.engine setLocalPreview:self.localPreview];
-    [sharedLib.engine joinRoomWithRoomId:self.roomid userId:self.userid token:self.token completionHandler:^(NSDictionary * _Nonnull response, int errorCode) {
-        NSLog(@"response:%@",response);
-        NSLog(@"errorCode:%d",errorCode);
-        if (errorCode){
-           NSLog(@"join fail");
-        }else{ //加入房间成功
-            NSLog(@"join success");
-        }
-    }];
+    [[RNMyLib sharedLib].engine publish];
+    [[RNMyLib sharedLib].engine setLocalPreview:self.localPreview];
 }
 
 /**
