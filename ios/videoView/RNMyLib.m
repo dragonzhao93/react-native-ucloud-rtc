@@ -152,40 +152,8 @@ RCT_EXPORT_METHOD(unSubscribeRemoteStream){
 */
 RCT_EXPORT_METHOD(publishLocalStreamWithCameraEnable:(BOOL)cameraEnable){
     [RNMyLib sharedLib].cameraEnable = cameraEnable;
-    [[RNMyLib sharedLib].engine leaveRoom];
-    RNMyLib *sharedLib = [RNMyLib sharedLib];
-    if (sharedLib.engine) {
-        sharedLib.engine = nil;
-    }
-    if (nil==sharedLib.engine) {
-        sharedLib.engine = [[UCloudRtcEngine alloc]initWithAppID:self.appid appKey:self.appkey completionBlock:^(int errorCode) {
-            if (errorCode) {
-                NSLog(@"init fail");
-            }else{
-                NSLog(@"init success");
-            }
-        }];
-    }
-    sharedLib.engine.streamProfile = UCloudRtcEngine_StreamProfileAll;
-    sharedLib.engine.isOnlyAudio = NO;
-    sharedLib.engine.delegate = sharedLib;
-    sharedLib.engine.isAutoPublish = YES;
-    sharedLib.engine.isAutoSubscribe = YES;
-    
-    //设置本地预览模式：等比缩放填充整View，可能有部分被裁减
-    [sharedLib.engine setPreviewMode:UCloudRtcVideoViewModeScaleAspectFill];
-    //设置远端预览模式：等比缩放填充整View，可能有部分被裁减
-    [sharedLib.engine setRemoteViewMode:UCloudRtcVideoViewModeScaleAspectFill];
-    [sharedLib.engine setLocalPreview:self.localPreview];
-    [sharedLib.engine joinRoomWithRoomId:self.roomid userId:self.userid token:self.token completionHandler:^(NSDictionary * _Nonnull response, int errorCode) {
-        NSLog(@"response:%@",response);
-        NSLog(@"errorCode:%d",errorCode);
-        if (errorCode){
-           NSLog(@"join fail");
-        }else{ //加入房间成功
-            NSLog(@"join success");
-        }
-    }];
+    [[RNMyLib sharedLib].engine publish];
+    [[RNMyLib sharedLib].engine setLocalPreview:self.localPreview];
 }
 
 /**
