@@ -7,7 +7,7 @@ import android.util.Log;
  */
 
 public class SuperLog {
-    private static final boolean IS_LOG = true;
+    private static final boolean IS_LOG = false;
 
     public static void e(String key, String value) {
         if (IS_LOG) {

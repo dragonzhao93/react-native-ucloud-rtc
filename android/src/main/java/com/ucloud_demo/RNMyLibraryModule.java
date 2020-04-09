@@ -77,7 +77,6 @@ public class RNMyLibraryModule extends ReactContextBaseJavaModule {
                 rnMyVideoView = RNMyVideoView.getInstance(mContext);
                 //必须要Looper.prepare
                 sdkEngine = UCloudRtcSdkEngine.createEngine(eventListener);
-                sdkEngine.setClassType(UCloudRtcSdkRoomType.UCLOUD_RTC_SDK_ROOM_SMALL);
             }
         });
     }
@@ -97,7 +96,7 @@ public class RNMyLibraryModule extends ReactContextBaseJavaModule {
      */
     private void initUCloud(){
         UCloudRtcSdkEnv.initEnv(mContext.getApplicationContext());
-        UCloudRtcSdkEnv.setWriteToLogCat(true);
+
         UCloudRtcSdkEnv.setLogLevel(UCloudRtcSdkLogLevel.UCLOUD_RTC_SDK_LogLevelInfo);
         UCloudRtcSdkEnv.setSdkMode(UCloudRtcSdkMode.UCLOUD_RTC_SDK_MODE_TRIVAL);
         UCloudRtcSdkEnv.setTokenSeckey(CommonUtils.SEC_KEY);
@@ -118,13 +117,32 @@ public class RNMyLibraryModule extends ReactContextBaseJavaModule {
         sdkEngine.configLocalScreenPublish(true) ; // 设置桌面是否发布，作用同上
         sdkEngine.setStreamRole(UCloudRtcSdkStreamRole.UCLOUD_RTC_SDK_STREAM_ROLE_BOTH);// 流权限
         sdkEngine.setAutoPublish(false) ; // 是否自动发布
-        sdkEngine.setAutoSubscribe(true) ;// 是否自动订阅
+        sdkEngine.setAutoSubscribe(false) ;// 是否自动订阅
+        UCloudRtcSdkEnv.setWriteToLogCat(true);
         // 摄像头输出等级
         sdkEngine.setVideoProfile(UCloudRtcSdkVideoProfile.matchValue(0)) ;
         SuperLog.e("RNMyLibraryModule","this is initWithAppid");
         promise.resolve("resolve");
     }
-
+    @ReactMethod
+    public void initWithAppid(String appId,String appKey,boolean isDebug,int classType,int streamProfile,Promise promise){
+        this.mAppId = appId;
+        sdkEngine.setAudioOnlyMode(false) ; // 设置纯音频模式
+        UCloudRtcSdkEnv.setWriteToLogCat(isDebug);
+        sdkEngine.configLocalCameraPublish(true) ; // 设置摄像头是否发布
+        sdkEngine.configLocalAudioPublish(true) ; // 设置音频是否发布，用于让sdk判断自动发布的媒体类型
+        sdkEngine.configLocalScreenPublish(true) ; // 设置桌面是否发布，作用同上
+        // 流权限
+        sdkEngine.setStreamRole(UCloudRtcSdkStreamRole.valueOf(streamProfile));
+        sdkEngine.setAutoPublish(false) ; // 是否自动发布
+        sdkEngine.setAutoSubscribe(false) ;// 是否自动订阅
+        //小班级最多容纳15名学生，如果同时设置UCLOUD_RTC_SDK_STREAM_ROLE_BOTH权限，实际上最多只有10名学生可以同时推流
+        //大班级容纳人数没有上限，但是只能老师使用如果同时设置UCLOUD_RTC_SDK_STREAM_ROLE_BOTH权限权限，学生只能使用SUB(订阅)权限，4月底支持
+        sdkEngine.setClassType(UCloudRtcSdkRoomType.valueOf(classType));
+        // 摄像头输出等级
+        sdkEngine.setVideoProfile(UCloudRtcSdkVideoProfile.matchValue(0)) ;
+        promise.resolve("resolve");
+    }
 
     private Promise roomPromise;
     @ReactMethod
@@ -324,8 +342,7 @@ public class RNMyLibraryModule extends ReactContextBaseJavaModule {
                     info.setHasVideo(true);
                     info.setHasAudio(true);
                     info.setHasData(true);
-                    //本地不渲染，渲染媒体流
-                    //或者是两块不同的View展示不同的东西
+                    //两块不同的View分别渲染本地流和媒体流
                     //防止本地和媒体同时展示在一个View上面
                     sdkEngine.startPreview(info.getMediaType(),localrenderview,UCloudRtcSdkScaleType.UCLOUD_RTC_SDK_SCALE_ASPECT_FIT,null);
                 }
@@ -353,12 +370,11 @@ public class RNMyLibraryModule extends ReactContextBaseJavaModule {
             //开通自动订阅之后，当订阅的用户推流后会自动调用本方法
             userId = uCloudRtcSdkStreamInfo.getUId();
             //订阅远程流
-            SuperLog.e("RNMyLibraryModule","this is subscribeRemoteStream");
             UCloudRtcSdkStreamInfo info = new UCloudRtcSdkStreamInfo();
             info.setUid(userId);
             info.setHasAudio(true);
             info.setHasVideo(true);
-            info.setMediaType(UCloudRtcSdkMediaType.UCLOUD_RTC_SDK_MEDIA_TYPE_VIDEO);
+//            info.setMediaType(UCloudRtcSdkMediaType.UCLOUD_RTC_SDK_MEDIA_TYPE_VIDEO);
             sdkEngine.subscribe(info);
         }
 
