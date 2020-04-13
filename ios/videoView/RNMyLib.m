@@ -152,7 +152,6 @@ RCT_EXPORT_METHOD(unSubscribeRemoteStream){
  @param cameraEnable设置本地流是否启用相机(YES为音视频  NO是纯音频)
 */
 RCT_EXPORT_METHOD(publishLocalStreamWithCameraEnable:(BOOL)cameraEnable){
-    [RNMyLib sharedLib].engine.streamProfile = UCloudRtcEngine_StreamProfileAll;
     [RNMyLib sharedLib].cameraEnable = cameraEnable;
     [[RNMyLib sharedLib].engine publish];
     [[RNMyLib sharedLib].engine setLocalPreview:self.localPreview];

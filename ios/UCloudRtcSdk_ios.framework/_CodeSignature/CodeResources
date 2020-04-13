@@ -4,13 +4,9 @@
 <dict>
 	<key>files</key>
 	<dict>
-		<key>.DS_Store</key>
-		<data>
-		LXBurl/EJVh/TvxIa2kmNJfGjl8=
-		</data>
 		<key>Headers/UCloudRtcEngine.h</key>
 		<data>
-		Xakt2eObGFIpBZlIVZ8BTtPg04o=
+		ys0bMXEFRzwkrxjz6kSQvxnu3nM=
 		</data>
 		<key>Headers/UCloudRtcError.h</key>
 		<data>
@@ -42,7 +38,7 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		6J7ai4Srz56Yotzii18yti8dzQc=
+		/JCNbcxn/DjmaKNQDzopcVt+tu4=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -59,11 +55,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			Xakt2eObGFIpBZlIVZ8BTtPg04o=
+			ys0bMXEFRzwkrxjz6kSQvxnu3nM=
 			</data>
 			<key>hash2</key>
 			<data>
-			fbg0rwFgrBUN/wE7mbAjB9IYRUVK33vPa0B+Q/DPun4=
+			RXjaF2Hz8E0ywmqImNb9ShH92A1RBdOi6OgQesiBGsA=
 			</data>
 		</dict>
 		<key>Headers/UCloudRtcError.h</key>
