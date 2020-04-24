@@ -6,7 +6,7 @@
 	<dict>
 		<key>Headers/UCloudRtcEngine.h</key>
 		<data>
-		ys0bMXEFRzwkrxjz6kSQvxnu3nM=
+		eopA1ZGOhQyj8et+IRC3y9rrYKs=
 		</data>
 		<key>Headers/UCloudRtcError.h</key>
 		<data>
@@ -16,13 +16,21 @@
 		<data>
 		iP90iZO5UzYZ4VOvc86Fo73nD64=
 		</data>
+		<key>Headers/UCloudRtcMixConfig.h</key>
+		<data>
+		JSNzJs19Wy50/OeHTBVRwHq40IE=
+		</data>
+		<key>Headers/UCloudRtcMixStopConfig.h</key>
+		<data>
+		qd9go/NIqB2aNPMKMdUoGDpVwMY=
+		</data>
 		<key>Headers/UCloudRtcRecordConfig.h</key>
 		<data>
 		eOuu7DobfvFqeou0vv/Z7IB42z0=
 		</data>
 		<key>Headers/UCloudRtcSdk_ios.h</key>
 		<data>
-		eT3M1DBFVmuDYY3iFR1NxdmRqck=
+		xIfQ7V9FY0cFyTJUkDn7FdVtm5Q=
 		</data>
 		<key>Headers/UCloudRtcStream.h</key>
 		<data>
@@ -38,7 +46,7 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		/JCNbcxn/DjmaKNQDzopcVt+tu4=
+		cTW9hu3f0ri4sReKhGdtNS/7tfI=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -55,11 +63,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			ys0bMXEFRzwkrxjz6kSQvxnu3nM=
+			eopA1ZGOhQyj8et+IRC3y9rrYKs=
 			</data>
 			<key>hash2</key>
 			<data>
-			RXjaF2Hz8E0ywmqImNb9ShH92A1RBdOi6OgQesiBGsA=
+			gUlNZSmp37VE6OQT5gp5zWVsNItMIsFIPIdlrDGOH+M=
 			</data>
 		</dict>
 		<key>Headers/UCloudRtcError.h</key>
@@ -84,6 +92,28 @@
 			ADZ1vsDrrL4o9t02xVa7NtoWWP2D6uV0ruOkfpxHEEw=
 			</data>
 		</dict>
+		<key>Headers/UCloudRtcMixConfig.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			JSNzJs19Wy50/OeHTBVRwHq40IE=
+			</data>
+			<key>hash2</key>
+			<data>
+			q7QNUEk51j2vQnYxhPoizXdhfsUZu02Nd89qHol4iRY=
+			</data>
+		</dict>
+		<key>Headers/UCloudRtcMixStopConfig.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			qd9go/NIqB2aNPMKMdUoGDpVwMY=
+			</data>
+			<key>hash2</key>
+			<data>
+			bJV2rKGfAvzlBKsQD9JZ51VHarfB+/ZyOfIR4AUqGvQ=
+			</data>
+		</dict>
 		<key>Headers/UCloudRtcRecordConfig.h</key>
 		<dict>
 			<key>hash</key>
@@ -99,11 +129,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			eT3M1DBFVmuDYY3iFR1NxdmRqck=
+			xIfQ7V9FY0cFyTJUkDn7FdVtm5Q=
 			</data>
 			<key>hash2</key>
 			<data>
-			3IwVXNcS3EWjI2l4YhmwFxE0NBumM8gMXsKoFE02w5A=
+			aOgxeIYt0Zz0xtE+x7mVPJOSoAmzEg54BXNx1PryvX8=
 			</data>
 		</dict>
 		<key>Headers/UCloudRtcStream.h</key>
